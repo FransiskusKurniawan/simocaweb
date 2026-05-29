@@ -103,9 +103,7 @@
                             Go to Dashboard
                         </a>
                     @else
-                        <a href="/login" class="w-full bg-blue-600 text-white font-bold py-5 rounded-2xl text-center shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                            Get Started
-                        </a>
+
                         <a href="/login" class="w-full bg-white text-blue-600 font-bold py-5 rounded-2xl text-center border-2 border-blue-50 shadow-sm hover:bg-blue-50 transition-all hover:scale-[1.02] active:scale-[0.98]">
                             Login
                         </a>
@@ -193,9 +191,7 @@
                                 Go to Monitoring
                             </a>
                         @else
-                            <a href="/login" class="block w-full bg-blue-600 text-white font-bold py-5 rounded-2xl shadow-lg shadow-blue-600/20 active:scale-95 transition-transform text-center font-bold">
-                                Get Started
-                            </a>
+
                             <a href="/login" class="block w-full bg-white text-blue-600 font-bold py-5 rounded-2xl border-2 border-blue-50 active:scale-95 transition-transform text-center font-bold">
                                 Login
                             </a>

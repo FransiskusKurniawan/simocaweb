@@ -202,6 +202,34 @@
         </div>
     </div>
 
+    <!-- Export Data Section -->
+    <div class="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col md:flex-row items-center justify-between gap-6 transition-all">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center">
+                <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h4 class="text-base font-black text-slate-800 tracking-tight">Export Sensor Data</h4>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Download as Excel (.xlsx)</p>
+            </div>
+        </div>
+        
+        <form action="{{ route('dashboard.export') }}" method="GET" class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+            <div class="flex flex-col gap-1 w-full md:w-44">
+                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">Start Date</label>
+                <input type="date" name="start_date" id="export-start-date" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all">
+            </div>
+            <div class="flex flex-col gap-1 w-full md:w-44">
+                <label class="text-[9px] font-bold text-slate-400 uppercase ml-1">End Date</label>
+                <input type="date" name="end_date" id="export-end-date" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all">
+            </div>
+            <button type="submit" class="w-full md:w-auto mt-4 bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-2.5 rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download (.xlsx)
+            </button>
+        </form>
+    </div>
+
     <!-- Extra Info Banner -->
     <div class="bg-slate-900 rounded-[2rem] p-6 text-white overflow-hidden relative">
         <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -390,6 +418,22 @@
                         pumpText2.classList.toggle('text-slate-400', !isActive2);
                     }
                 });
+        }
+
+        // Date validation for exporting data
+        const exportStartDateInput = document.getElementById('export-start-date');
+        const exportEndDateInput = document.getElementById('export-end-date');
+        if (exportStartDateInput && exportEndDateInput) {
+            exportStartDateInput.addEventListener('change', () => {
+                if (exportStartDateInput.value) {
+                    exportEndDateInput.min = exportStartDateInput.value;
+                }
+            });
+            exportEndDateInput.addEventListener('change', () => {
+                if (exportEndDateInput.value) {
+                    exportStartDateInput.max = exportEndDateInput.value;
+                }
+            });
         }
     });
 </script>

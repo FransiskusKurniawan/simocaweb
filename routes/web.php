@@ -31,6 +31,7 @@ Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/export', [App\Http\Controllers\SensorExportController::class, 'export'])->name('dashboard.export');
     Route::get('/monitoring/rainfall', [App\Http\Controllers\MonitoringController::class, 'rainfall'])->name('monitoring.rainfall');
     Route::get('/monitoring/rainfall/history', [App\Http\Controllers\MonitoringController::class, 'getHistory'])->name('monitoring.rainfall.history');
     Route::get('/monitoring/temperature', [App\Http\Controllers\MonitoringController::class, 'temperature'])->name('monitoring.temperature');
