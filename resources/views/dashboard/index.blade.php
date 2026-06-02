@@ -373,7 +373,7 @@
                     const pumpText = document.getElementById('pump-status-text');
                     
                     if (pumpCard && pumpIcon && pumpText) {
-                        const isActive = !!data.status_pompa;
+                        const isActive = data.status_pompa === true || data.status_pompa === 1 || data.status_pompa === '1' || data.status_pompa === 'true';
                         
                         // Card classes
                         pumpCard.classList.toggle('bg-emerald-500', isActive);
@@ -400,7 +400,7 @@
                     const pumpText2 = document.getElementById('pump-status-text-2');
                     
                     if (pumpCard2 && pumpIcon2 && pumpText2) {
-                        const isActive2 = !!data.status_pompa2;
+                        const isActive2 = data.status_pompa2 === true || data.status_pompa2 === 1 || data.status_pompa2 === '1' || data.status_pompa2 === 'true';
                         
                         pumpCard2.classList.toggle('bg-emerald-500', isActive2);
                         pumpCard2.classList.toggle('bg-slate-500', !isActive2);

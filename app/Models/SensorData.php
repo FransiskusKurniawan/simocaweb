@@ -28,6 +28,22 @@ class SensorData extends Model
         'delay',
     ];
 
+    protected $casts = [
+        'rainfall' => 'float',
+        'temperature' => 'float',
+        'humidity' => 'float',
+        'lux' => 'float',
+        'water_level' => 'float',
+        'current_panel' => 'float',
+        'voltage_panel' => 'float',
+        'current_baterai' => 'float',
+        'voltage_baterai' => 'float',
+        'status_pompa' => 'boolean',
+        'status_pompa2' => 'boolean',
+        'jitter' => 'float',
+        'delay' => 'float',
+    ];
+
     /**
      * Get the dynamic status based on rainfall intensity.
      */
