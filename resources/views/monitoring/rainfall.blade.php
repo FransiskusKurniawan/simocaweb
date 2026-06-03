@@ -45,8 +45,13 @@
 
                 <div class="text-right">
                     <div class="flex items-baseline justify-end gap-1.5">
-                        <span class="text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall ?? 0, 2) }}</span>
-                        <span class="text-sm font-bold text-slate-400">mm</span>
+                        <span class="text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall_hourly ?? 0, 2) }}</span>
+                        <span class="text-sm font-bold text-slate-400">mm/minute</span>
+                    </div>
+                    <div class="text-[10px] font-semibold text-slate-400 mt-1 flex items-center justify-end gap-1">
+                        <span>Raw sensor input:</span>
+                        <span id="current-rainfall-minute" class="font-bold text-slate-700">{{ number_format($latest->rainfall ?? 0, 2) }}</span>
+                        <span>mm/minute</span>
                     </div>
                     <div class="flex items-center justify-end gap-1 mt-1">
                         <div id="trend-indicator" class="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-50 text-slate-400">
@@ -126,7 +131,7 @@
             </div>
             <div class="flex items-baseline gap-1">
                 <span class="text-3xl font-black text-slate-800" id="stat-max">{{ number_format($globalStats['max'], 1) }}</span>
-                <span class="text-xs font-bold text-slate-400">mm</span>
+                <span class="text-xs font-bold text-slate-400">mm/minute</span>
             </div>
         </div>
 
@@ -187,7 +192,7 @@
                     }
                     
                     const timestamp = date.getTime();
-                    const rainfallValue = item.rainfall !== undefined && item.rainfall !== null ? parseFloat(item.rainfall) : null;
+                    const rainfallValue = item.rainfall_hourly !== undefined && item.rainfall_hourly !== null ? parseFloat(item.rainfall_hourly) : null;
 
                     return {
                         x: timestamp,
@@ -209,7 +214,7 @@
         // Chart Configuration
         const options = {
             series: [{
-                name: 'Rainfall Intensity',
+                name: 'Rainfall (mm/minute)',
                 data: chartData
             }],
             colors: ['#0284c7'],
@@ -373,7 +378,7 @@
                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-800 pb-1">${timeStr}</div>
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full bg-primary-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                                <div class="text-lg font-black tracking-tight">${value.toFixed(2)} <span class="text-xs font-bold text-slate-400">mm</span></div>
+                                <div class="text-lg font-black tracking-tight">${value.toFixed(2)} <span class="text-xs font-bold text-slate-400">mm/minute</span></div>
                             </div>
                         </div>
                     `;
@@ -656,7 +661,8 @@
                     const data = e.data;
                     console.log('Real-time data received:', data);
                     
-                    const rainfallValue = data.rainfall !== undefined && data.rainfall !== null ? parseFloat(data.rainfall) : null;
+                    const rainfallValue = data.rainfall_hourly !== undefined && data.rainfall_hourly !== null ? parseFloat(data.rainfall_hourly) : null;
+                    const rawRainfallValue = data.rainfall !== undefined && data.rainfall !== null ? parseFloat(data.rainfall) : null;
                     const timeSource = data.timertc || data.created_at;
                     const timestamp = timeSource ? new Date(timeSource).getTime() : Date.now();
 
@@ -707,6 +713,11 @@
                     }
 
                     updateSummary(currentGlobalStats);
+
+                    const currentMinuteEl = document.getElementById('current-rainfall-minute');
+                    if (currentMinuteEl && rawRainfallValue !== null) {
+                        currentMinuteEl.innerText = rawRainfallValue.toFixed(2);
+                    }
                 });
         }
     });

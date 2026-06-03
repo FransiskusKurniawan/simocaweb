@@ -29,22 +29,47 @@
         <p class="text-slate-400 text-sm mt-1 max-w-xs mx-auto">Connecting sensors... data will appear here automatically once transmitted.</p>
     </div>
     @else
+    @php
+        $status = $latestData->status;
+        $videoFile = 'norain.mp4';
+        if ($status === 'Very Light Rain') {
+            $videoFile = 'verylightrain.mp4';
+        } elseif ($status === 'Light Rain') {
+            $videoFile = 'lightrain.mp4';
+        } elseif ($status === 'Moderate Rain') {
+            $videoFile = 'moderaterain.mp4';
+        } elseif ($status === 'Heavy Rain') {
+            $videoFile = 'heavyrain.mp4';
+        } elseif ($status === 'Very Heavy Rain') {
+            $videoFile = 'veryheavyrain.mp4';
+        }
+    @endphp
 
     <!-- Main Status Banner -->
     <a href="{{ route('monitoring.rainfall') }}" class="block relative overflow-hidden group hover:scale-[1.01] hover:shadow-xl hover:shadow-primary-600/20 active:scale-[0.99] transition-all duration-300">
-        <div class="absolute inset-0 bg-primary-600 rounded-[2.5rem]"></div>
+        <video id="rainfall-video" data-base-url="{{ asset('video') }}/" autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover rounded-[2.5rem] z-0" style="object-position: 65% 15%;" src="{{ asset('video/' . $videoFile) }}">
+        </video>
+        <div class="absolute inset-0 bg-primary-600/40 rounded-[2.5rem] z-10"></div>
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         
-        <div class="relative p-8 text-white flex flex-col md:flex-row md:items-center justify-between gap-6 pb-12 md:pb-8">
+        <div class="relative z-20 p-8 text-white flex flex-col md:flex-row md:items-center justify-between gap-6 pb-12 md:pb-8">
             <div class="flex items-center gap-6">
                 <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center shadow-inner">
                     <i data-lucide="cloud-rain" class="w-10 h-10"></i>
                 </div>
                 <div>
-                    <p class="text-primary-100 text-xs font-bold uppercase tracking-widest mb-1">Total Rainfall</p>
-                    <div class="flex items-baseline gap-2">
-                        <span class="text-5xl font-black" id="rainfall-value">{{ $latestData->rainfall }}</span>
-                        <span class="text-primary-200 font-bold">mm</span>
+                    <p class="text-primary-100 text-[10px] font-bold uppercase tracking-widest mb-2 leading-none">Rainfall</p>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-5xl font-black tracking-tight" id="rainfall-value">{{ number_format($latestData->rainfall_hourly, 2) }}</span>
+                            <span class="text-primary-200 font-bold text-sm uppercase tracking-wider">mm/hour</span>
+                        </div>
+                        
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 text-white shadow-inner w-fit sm:ml-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-300 animate-pulse"></span>
+                            <span id="rainfall-minute-value" class="text-xs font-bold tabular-nums">{{ number_format($latestData->rainfall, 2) }}</span>
+                            <span class="text-[9px] font-bold text-primary-200 uppercase tracking-wider">mm/minute</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -52,7 +77,7 @@
             <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-6 py-4 flex flex-col items-center flex-shrink-0">
                 <p class="text-[10px] font-bold text-primary-100 uppercase tracking-widest mb-1">Status</p>
                 @php
-                    $r = $latestData->rainfall;
+                    $r = $latestData->rainfall_hourly;
                     if ($r < 1) {
                         $dotColor = 'bg-green-400';
                         $shadowColor = 'rgba(74,222,128,0.5)';
@@ -299,13 +324,12 @@
                     console.log('Real-time data received:', e.data);
                     
                     const data = e.data;
-                    
-                    // Calculate dynamic status text & dot style
-                    const r = parseFloat(data.rainfall);
+                                      // Calculate dynamic status text & dot style
+                    const r = parseFloat(data.rainfall_hourly);
                     let statusText = 'No Rain';
                     let dotClass = 'bg-green-400';
                     let shadowColor = 'rgba(74,222,128,0.5)';
-
+ 
                     if (r <= 0) {
                         statusText = 'No Rain';
                         dotClass = 'bg-green-400';
@@ -334,7 +358,8 @@
                     
                     // Update simple text values
                     const fields = {
-                        'rainfall-value': data.rainfall,
+                        'rainfall-value': parseFloat(data.rainfall_hourly).toFixed(2),
+                        'rainfall-minute-value': parseFloat(data.rainfall).toFixed(2),
                         'status-value': statusText,
                         'temperature-value': data.temperature,
                         'humidity-value': data.humidity,
@@ -365,6 +390,28 @@
                     if (statusDot) {
                         statusDot.className = `w-3 h-3 rounded-full ${dotClass}`;
                         statusDot.style.boxShadow = `0 0 12px ${shadowColor}`;
+                    }
+
+                    // Update Dynamic Background Video
+                    const video = document.getElementById('rainfall-video');
+                    if (video) {
+                        const baseUrl = video.getAttribute('data-base-url');
+                        const videoMap = {
+                            'No Rain': 'norain.mp4',
+                            'Very Light Rain': 'verylightrain.mp4',
+                            'Light Rain': 'lightrain.mp4',
+                            'Moderate Rain': 'moderaterain.mp4',
+                            'Heavy Rain': 'heavyrain.mp4',
+                            'Very Heavy Rain': 'veryheavyrain.mp4'
+                        };
+                        const videoFile = videoMap[statusText] || 'norain.mp4';
+                        const targetSrc = baseUrl + videoFile;
+                        
+                        if (!video.src.endsWith(videoFile)) {
+                            video.src = targetSrc;
+                            video.load();
+                            video.play().catch(e => console.log('Video autoplay error:', e));
+                        }
                     }
 
                     // Update Pump UI
