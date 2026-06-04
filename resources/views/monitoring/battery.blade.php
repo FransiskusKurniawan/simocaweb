@@ -76,7 +76,7 @@
             
             <div class="flex items-center justify-center gap-6 w-full md:w-auto px-2">
                 <div class="flex items-center gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.4)]"></div>
+                    <div class="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"></div>
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Voltage (V)</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -131,9 +131,9 @@
 
     <!-- Summary Stats -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div class="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-indigo-200 transition-colors">
+        <div class="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-red-200 transition-colors">
             <div class="flex items-center gap-3 mb-3 md:mb-4">
-                <div class="w-7 h-7 md:w-8 md:h-8 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
+                <div class="w-7 h-7 md:w-8 md:h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
                     <i data-lucide="battery" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
                 </div>
                 <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Max Volt</p>
@@ -157,9 +157,9 @@
             </div>
         </div>
 
-        <div class="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-indigo-200 transition-colors">
+        <div class="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-red-200 transition-colors">
             <div class="flex items-center gap-3 mb-3 md:mb-4">
-                <div class="w-7 h-7 md:w-8 md:h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                <div class="w-7 h-7 md:w-8 md:h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
                     <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 md:w-4 md:h-4"></i>
                 </div>
                 <p class="text-[9px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Avg Volt</p>
@@ -236,7 +236,7 @@
                 { name: 'Voltage', data: voltageData },
                 { name: 'Current', data: currentData }
             ],
-            colors: ['#4f46e5', '#8b5cf6'],
+            colors: ['#ef4444', '#8b5cf6'],
             chart: {
                 type: 'line',
                 height: 400,
@@ -284,9 +284,9 @@
             yaxis: [
                 {
                     seriesName: 'Voltage',
-                    title: { text: 'Voltage (V)', style: { color: '#4f46e5', fontWeight: 800 } },
+                    title: { text: 'Voltage (V)', style: { color: '#ef4444', fontWeight: 800 } },
                     labels: {
-                        style: { colors: '#4f46e5', fontWeight: 600 },
+                        style: { colors: '#ef4444', fontWeight: 600 },
                         formatter: (val) => val.toFixed(1) + ' V'
                     }
                 },
@@ -324,7 +324,7 @@
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between gap-8">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                        <div class="w-2 h-2 rounded-full bg-red-500"></div>
                                         <span class="text-[10px] font-bold text-slate-400 uppercase">Voltage</span>
                                     </div>
                                     <div class="text-sm font-black">${v.toFixed(1)} <span class="text-[10px] text-slate-500">V</span></div>

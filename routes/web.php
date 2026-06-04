@@ -46,12 +46,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/monitoring/solar-panel/history', [App\Http\Controllers\MonitoringController::class, 'getSolarPanelHistory'])->name('monitoring.solar_panel.history');
     Route::get('/monitoring/battery', [App\Http\Controllers\MonitoringController::class, 'battery'])->name('monitoring.battery');
     Route::get('/monitoring/battery/history', [App\Http\Controllers\MonitoringController::class, 'getBatteryHistory'])->name('monitoring.battery.history');
-    // Route::get('/setting', function () {
-    //     return view('auth.setting');
-    // })->name('setting');
-    // Route::get('/setting/password', [AuthWebController::class, 'showChangePassword'])->name('change-password');
-    // Route::post('/setting/password', [AuthWebController::class, 'updatePassword'])->name('update-password');
-    // Route::get('/setting/username', [AuthWebController::class, 'showChangeUsername'])->name('change-username');
-    // Route::post('/setting/username', [AuthWebController::class, 'updateUsername'])->name('update-username');
-    // Route::post('/setting/photo', [AuthWebController::class, 'uploadProfilePhoto'])->name('upload-photo');
+    Route::get('/setting', function () {
+        return view('auth.setting');
+    })->name('setting');
+    Route::get('/setting/password', [AuthWebController::class, 'showChangePassword'])->name('change-password');
+    Route::post('/setting/password', [AuthWebController::class, 'updatePassword'])->name('update-password');
+    Route::get('/setting/username', [AuthWebController::class, 'showChangeUsername'])->name('change-username');
+    Route::post('/setting/username', [AuthWebController::class, 'updateUsername'])->name('update-username');
+    Route::post('/setting/photo', [AuthWebController::class, 'uploadProfilePhoto'])->name('upload-photo');
 });

@@ -51,12 +51,11 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between ml-1 text-sm">
+            <div class="flex items-center ml-1 text-sm">
                 <label class="flex items-center gap-2 cursor-pointer group">
                     <input type="checkbox" name="remember" class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
                     <span class="text-slate-500 group-hover:text-slate-700 transition-colors">Remember me</span>
                 </label>
-                <a href="#" class="text-blue-600 font-bold hover:text-blue-700 transition-colors">Forgot Password?</a>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">

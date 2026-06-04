@@ -110,20 +110,46 @@
             </div>
         </div>
 
-        <div class="ml-auto flex items-center gap-4">
+        <div class="ml-auto flex items-center gap-4" x-data="{ isOpen: false }">
             <!-- Notifications (Optional) -->
             <button class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors relative">
                 <i data-lucide="bell" class="w-5 h-5"></i>
                 <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
             
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="flex items-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-500 text-red-500 hover:text-white rounded-2xl transition-all shadow-sm font-bold text-sm group">
-                    <i data-lucide="log-out" class="w-4 h-4 transition-transform group-hover:scale-110"></i>
-                    <span>Sign Out</span>
+            <!-- Burger Menu Dropdown -->
+            <div class="relative">
+                <button @click="isOpen = !isOpen" class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-slate-50 border border-slate-200 shadow-sm transition-all focus:outline-none">
+                    <span x-show="!isOpen">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </span>
+                    <span x-show="isOpen" x-cloak>
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </span>
                 </button>
-            </form>
+
+                <!-- Dropdown Menu -->
+                <div x-show="isOpen" 
+                     @click.outside="isOpen = false"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100"
+                     x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute right-0 mt-2 w-48 bg-white rounded-2xl border border-slate-100 shadow-xl py-1.5 z-50 origin-top-right" 
+                     x-cloak>
+                     
+                     <!-- Sign Out Form -->
+                     <form action="{{ route('logout') }}" method="POST" class="w-full">
+                         @csrf
+                         <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 transition-colors text-left group">
+                             <i data-lucide="log-out" class="w-4 h-4 text-red-400 group-hover:translate-x-0.5 transition-transform"></i>
+                             Sign Out
+                         </button>
+                     </form>
+                </div>
+            </div>
         </div>
     </header>
 
