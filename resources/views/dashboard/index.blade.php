@@ -50,6 +50,20 @@
         <video id="rainfall-video" data-base-url="{{ asset('video') }}/" autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover rounded-[2.5rem] z-0" style="object-position: 65% 15%;" src="{{ asset('video/' . $videoFile) }}">
         </video>
         <div class="absolute inset-0 bg-primary-600/40 rounded-[2.5rem] z-10"></div>
+        
+        <!-- Video Loading Indicator (Glassmorphism Blur + Spinner) -->
+        <div id="video-loader" class="absolute inset-0 bg-slate-900/60 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-700 ease-out z-[12] pointer-events-none">
+            <div class="flex flex-col items-center gap-3">
+                <div class="relative w-12 h-12 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-primary-600/30 animate-ping" style="animation-duration: 2s;"></div>
+                    <div class="w-8 h-8 rounded-full border-4 border-white/20 border-t-white loader-spin"></div>
+                </div>
+                <p class="text-[10px] font-extrabold text-white/80 uppercase tracking-widest animate-pulse">
+                    Loading Visual...
+                </p>
+            </div>
+        </div>
+
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         
         <div class="relative z-20 p-8 text-white flex flex-col md:flex-row md:items-center justify-between gap-6 pb-12 md:pb-8">
@@ -152,7 +166,7 @@
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Water Level</p>
             <div class="flex items-baseline gap-1 mt-1">
                 <span class="text-2xl font-black text-slate-800" id="water-level-value">{{ $latestData->water_level }}</span>
-                <span class="text-xs font-bold text-slate-500">cm</span>
+                <span class="text-xs font-bold text-slate-500">m</span>
             </div>
         </a>
 
@@ -318,6 +332,36 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Video Loader Control Logic
+        const video = document.getElementById('rainfall-video');
+        const loader = document.getElementById('video-loader');
+
+        function showVideoLoader() {
+            if (loader) {
+                loader.classList.remove('opacity-0');
+                loader.classList.add('opacity-100');
+            }
+        }
+
+        function hideVideoLoader() {
+            if (loader) {
+                loader.classList.remove('opacity-100');
+                loader.classList.add('opacity-0');
+            }
+        }
+
+        if (video && loader) {
+            // Check if video is already loaded
+            if (video.readyState >= 3) {
+                hideVideoLoader();
+            }
+
+            video.addEventListener('loadstart', showVideoLoader);
+            video.addEventListener('waiting', showVideoLoader);
+            video.addEventListener('playing', hideVideoLoader);
+            video.addEventListener('canplay', hideVideoLoader);
+        }
+
         if (window.Echo) {
             window.Echo.channel('sensor-data')
                 .listen('.new-data', (e) => {
@@ -492,6 +536,13 @@
     }
     .animate-spin {
         animation: spin 3s linear infinite;
+    }
+    @keyframes loader-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .loader-spin {
+        animation: loader-spin 1s linear infinite;
     }
 </style>
 @endsection

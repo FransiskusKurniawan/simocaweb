@@ -45,7 +45,7 @@
                 <div class="text-right">
                     <div class="flex items-baseline justify-end gap-1.5">
                         <span class="text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-water-level-large">{{ number_format($latest->water_level ?? 0, 1) }}</span>
-                        <span class="text-sm font-bold text-slate-400">cm</span>
+                        <span class="text-sm font-bold text-slate-400">m</span>
                     </div>
                     <div class="flex items-center justify-end gap-1 mt-1">
                         <div id="trend-indicator" class="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-50 text-slate-400">
@@ -123,7 +123,7 @@
             </div>
             <div class="flex items-baseline gap-1">
                 <span class="text-3xl font-black text-slate-800" id="stat-max">{{ number_format($globalStats['max'], 1) }}</span>
-                <span class="text-xs font-bold text-slate-400">cm</span>
+                <span class="text-xs font-bold text-slate-400">m</span>
             </div>
         </div>
 
@@ -136,7 +136,7 @@
             </div>
             <div class="flex items-baseline gap-1">
                 <span class="text-3xl font-black text-slate-800" id="stat-avg">{{ number_format($globalStats['avg'], 1) }}</span>
-                <span class="text-xs font-bold text-slate-400">cm</span>
+                <span class="text-xs font-bold text-slate-400">m</span>
             </div>
         </div>
 
@@ -219,7 +219,7 @@
                             fontSize: '11px',
                             padding: { left: 8, right: 8, top: 4, bottom: 4 }
                         },
-                        text: chartData.length > 0 ? chartData[chartData.length - 1].y.toFixed(1) + ' cm' : '0.0 cm'
+                        text: chartData.length > 0 ? chartData[chartData.length - 1].y.toFixed(1) + ' m' : '0.0 m'
                     }
                 }],
                 points: [{
@@ -327,7 +327,7 @@
                 opposite: true,
                 labels: {
                     style: { colors: '#94a3b8', fontSize: '11px', fontWeight: 600 },
-                    formatter: (val) => val.toFixed(1) + ' cm'
+                    formatter: (val) => val.toFixed(1) + ' m'
                 }
             },
             grid: {
@@ -357,7 +357,7 @@
                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-800 pb-1">${timeStr}</div>
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>
-                                <div class="text-lg font-black tracking-tight">${value.toFixed(1)} <span class="text-xs font-bold text-slate-400">cm</span></div>
+                                <div class="text-lg font-black tracking-tight">${value.toFixed(1)} <span class="text-xs font-bold text-slate-400">m</span></div>
                             </div>
                         </div>
                     `;
@@ -421,7 +421,7 @@
                                 fontWeight: 800,
                                 fontSize: '11px'
                             },
-                            text: lastPoint ? lastPoint.y.toFixed(1) + ' cm' : '0.0 cm'
+                            text: lastPoint ? lastPoint.y.toFixed(1) + ' m' : '0.0 m'
                         }
                     }],
                     points: lastPoint ? [{
