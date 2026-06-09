@@ -32,37 +32,43 @@
     @php
         $status = $latestData->status;
         $videoFile = 'norain.mp4';
+        $imageFile = 'norain.png';
         if ($status === 'Very Light Rain') {
             $videoFile = 'verylightrain.mp4';
+            $imageFile = 'verylightrain.png';
         } elseif ($status === 'Light Rain') {
             $videoFile = 'lightrain.mp4';
+            $imageFile = 'lightrain.png';
         } elseif ($status === 'Moderate Rain') {
             $videoFile = 'moderaterain.mp4';
+            $imageFile = 'moderaterain.png';
         } elseif ($status === 'Heavy Rain') {
             $videoFile = 'heavyrain.mp4';
+            $imageFile = 'heavyrain.png';
         } elseif ($status === 'Very Heavy Rain') {
             $videoFile = 'veryheavyrain.mp4';
+            $imageFile = 'veryheavyrain.png';
         }
     @endphp
 
     <!-- Main Status Banner -->
-    <a href="{{ route('monitoring.rainfall') }}" class="block relative overflow-hidden group hover:scale-[1.01] hover:shadow-xl hover:shadow-primary-600/20 active:scale-[0.99] transition-all duration-300">
-        <video id="rainfall-video" data-base-url="{{ asset('video') }}/" autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover rounded-[2.5rem] z-0" style="object-position: 65% 15%;" src="{{ asset('video/' . $videoFile) }}">
+    <a href="{{ route('monitoring.rainfall') }}" class="block relative overflow-hidden rounded-[2.5rem] group hover:scale-[1.01] hover:shadow-xl hover:shadow-primary-600/20 active:scale-[0.99] transition-all duration-300">
+        <!-- Blurred Image Fallback (shown while video loads) -->
+        <img
+            id="rainfall-bg-image"
+            src="{{ asset('images/' . $imageFile) }}"
+            data-base-url="{{ asset('images') }}/"
+            alt="rainfall background"
+            class="absolute inset-0 w-full h-full object-cover rounded-[2.5rem] z-0"
+            style="object-position: 65% 15%; filter: blur(8px); transform: scale(1.15);"
+        />
+        <!-- Video (fades in once ready, sits on top of image) -->
+        <video id="rainfall-video" data-base-url="{{ asset('video') }}/" autoplay muted loop playsinline
+            class="absolute inset-0 w-full h-full object-cover rounded-[2.5rem] z-[1] opacity-0 transition-opacity duration-700"
+            style="object-position: 65% 15%;"
+            src="{{ asset('video/' . $videoFile) }}">
         </video>
         <div class="absolute inset-0 bg-primary-600/40 rounded-[2.5rem] z-10"></div>
-        
-        <!-- Video Loading Indicator (Glassmorphism Blur + Spinner) -->
-        <div id="video-loader" class="absolute inset-0 bg-slate-900/60 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center transition-all duration-700 ease-out z-[12] pointer-events-none">
-            <div class="flex flex-col items-center gap-3">
-                <div class="relative w-12 h-12 flex items-center justify-center">
-                    <div class="absolute inset-0 rounded-full bg-primary-600/30 animate-ping" style="animation-duration: 2s;"></div>
-                    <div class="w-8 h-8 rounded-full border-4 border-white/20 border-t-white loader-spin"></div>
-                </div>
-                <p class="text-[10px] font-extrabold text-white/80 uppercase tracking-widest animate-pulse">
-                    Loading Visual...
-                </p>
-            </div>
-        </div>
 
         <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-700"></div>
         
@@ -332,34 +338,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Video Loader Control Logic
+        // Video Fade-In Logic (blurred image shown until video is ready)
         const video = document.getElementById('rainfall-video');
-        const loader = document.getElementById('video-loader');
+        const bgImage = document.getElementById('rainfall-bg-image');
 
-        function showVideoLoader() {
-            if (loader) {
-                loader.classList.remove('opacity-0');
-                loader.classList.add('opacity-100');
+        function showVideo() {
+            if (video) {
+                video.classList.add('opacity-100');
+                video.classList.remove('opacity-0');
             }
         }
 
-        function hideVideoLoader() {
-            if (loader) {
-                loader.classList.remove('opacity-100');
-                loader.classList.add('opacity-0');
-            }
-        }
-
-        if (video && loader) {
-            // Check if video is already loaded
+        if (video) {
+            // If video is already ready, show immediately
             if (video.readyState >= 3) {
-                hideVideoLoader();
+                showVideo();
             }
-
-            video.addEventListener('loadstart', showVideoLoader);
-            video.addEventListener('waiting', showVideoLoader);
-            video.addEventListener('playing', hideVideoLoader);
-            video.addEventListener('canplay', hideVideoLoader);
+            video.addEventListener('canplay', showVideo);
+            video.addEventListener('playing', showVideo);
         }
 
         if (window.Echo) {
@@ -436,10 +432,12 @@
                         statusDot.style.boxShadow = `0 0 12px ${shadowColor}`;
                     }
 
-                    // Update Dynamic Background Video
+                    // Update Dynamic Background Video & Image
                     const video = document.getElementById('rainfall-video');
+                    const bgImage = document.getElementById('rainfall-bg-image');
                     if (video) {
-                        const baseUrl = video.getAttribute('data-base-url');
+                        const videoBaseUrl = video.getAttribute('data-base-url');
+                        const imageBaseUrl = bgImage ? bgImage.getAttribute('data-base-url') : '';
                         const videoMap = {
                             'No Rain': 'norain.mp4',
                             'Very Light Rain': 'verylightrain.mp4',
@@ -448,10 +446,24 @@
                             'Heavy Rain': 'heavyrain.mp4',
                             'Very Heavy Rain': 'veryheavyrain.mp4'
                         };
+                        const imageMap = {
+                            'No Rain': 'norain.png',
+                            'Very Light Rain': 'verylightrain.png',
+                            'Light Rain': 'lightrain.png',
+                            'Moderate Rain': 'moderaterain.png',
+                            'Heavy Rain': 'heavyrain.png',
+                            'Very Heavy Rain': 'veryheavyrain.png'
+                        };
                         const videoFile = videoMap[statusText] || 'norain.mp4';
-                        const targetSrc = baseUrl + videoFile;
+                        const imageFile = imageMap[statusText] || 'norain.png';
+                        const targetSrc = videoBaseUrl + videoFile;
                         
                         if (!video.src.endsWith(videoFile)) {
+                            // Hide video, update image first
+                            video.classList.remove('opacity-100');
+                            video.classList.add('opacity-0');
+                            if (bgImage) bgImage.src = imageBaseUrl + imageFile;
+
                             video.src = targetSrc;
                             video.load();
                             video.play().catch(e => console.log('Video autoplay error:', e));
@@ -537,12 +549,6 @@
     .animate-spin {
         animation: spin 3s linear infinite;
     }
-    @keyframes loader-spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    .loader-spin {
-        animation: loader-spin 1s linear infinite;
-    }
+
 </style>
 @endsection
