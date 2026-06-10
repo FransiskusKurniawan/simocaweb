@@ -67,6 +67,19 @@
                 <button class="timeframe-btn px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600" data-range="1w">1W</button>
                 <button class="timeframe-btn px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600" data-range="1m">1M</button>
             </div>
+
+            <!-- Chart Pagination Controls -->
+            <div id="chart-pagination" class="flex items-center gap-1 p-1 bg-white rounded-xl border border-slate-100 shadow-sm">
+                <button id="prev-page-btn" class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                    <span>Older</span>
+                </button>
+                <span id="page-indicator" class="px-3 py-1.5 text-[11px] font-bold text-slate-600">Page 1</span>
+                <button id="next-page-btn" class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1" disabled>
+                    <span>Newer</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Chart Area -->
@@ -445,43 +458,48 @@
             chart.updateOptions(updateObj, false, true);
         };
 
-        const fetchTimeframeData = async (range) => {
+        let currentPage = 1;
+        let currentRange = '1d';
+
+        const updatePaginationUI = () => {
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+            const indicator = document.getElementById('page-indicator');
+            const paginationContainer = document.getElementById('chart-pagination');
+            
+            if (currentRange === 'custom') {
+                if (paginationContainer) paginationContainer.style.display = 'none';
+                return;
+            } else {
+                if (paginationContainer) paginationContainer.style.display = 'flex';
+            }
+            
+            if (indicator) indicator.innerText = `Page ${currentPage}`;
+            if (prevBtn) prevBtn.disabled = false;
+            if (nextBtn) nextBtn.disabled = (currentPage === 1);
+        };
+
+        const fetchTimeframeData = async (range, page = 1) => {
             try {
                 const chartContainer = document.querySelector("#water-level-chart");
                 chartContainer.style.opacity = '0.5';
                 
-                const response = await fetch(`{{ route('monitoring.water_level.history') }}?range=${range}`);
+                const response = await fetch(`{{ route('monitoring.water_level.history') }}?range=${range}&page=${page}`);
                 const result = await response.json();
                 
                 if (result.success) {
-                    chartData = parseHistoryData(result.data);
-                    
-                    let pivotDate;
-                    if (result.maxTime) {
-                        const parsedMax = new Date(result.maxTime.replace(' ', 'T'));
-                        pivotDate = isNaN(parsedMax.getTime()) ? new Date(result.maxTime) : parsedMax;
-                    } else {
-                        pivotDate = new Date(result.endTime);
+                    const parsedData = parseHistoryData(result.data);
+                    if (parsedData.length === 0 && page > 1) {
+                        alert('No older data available for this timeframe.');
+                        return;
                     }
+                    chartData = parsedData;
+                    currentPage = page;
+                    currentRange = range;
+                    updatePaginationUI();
                     
-                    const lastPoint = chartData.length > 0 ? chartData[chartData.length - 1] : null;
-                    const referenceTimestamp = lastPoint ? Math.max(lastPoint.x, pivotDate.getTime()) : pivotDate.getTime();
-                    
-                    const durations = {
-                        '5m': 5 * 60 * 1000,
-                        '1h': 60 * 60 * 1000,
-                        '12h': 12 * 60 * 60 * 1000,
-                        '1d': 24 * 60 * 60 * 1000,
-                        '1w': 7 * 24 * 60 * 60 * 1000,
-                        '1m': 30 * 24 * 60 * 60 * 1000
-                    };
-
-                    const maxDate = referenceTimestamp;
-                    let minDate = maxDate - (durations[range] || durations['1h']);
-
-                    if (range === 'custom') {
-                        minDate = new Date(result.startTime).getTime();
-                    }
+                    const maxDate = new Date(result.endTime).getTime();
+                    const minDate = new Date(result.startTime).getTime();
                     
                     const xaxisOptions = {
                         min: minDate,
@@ -537,6 +555,9 @@
             });
 
             const range = 'custom';
+            currentRange = 'custom';
+            currentPage = 1;
+            updatePaginationUI();
             const url = `{{ route('monitoring.water_level.history') }}?range=${range}&start_date=${start}&end_date=${end}`;
             
             fetchData(url, range);
@@ -598,6 +619,15 @@
         startDateInput.addEventListener('change', () => { if (startDateInput.value) endDateInput.min = startDateInput.value; });
         endDateInput.addEventListener('change', () => { if (endDateInput.value) startDateInput.max = endDateInput.value; });
 
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            fetchTimeframeData(currentRange, currentPage + 1);
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchTimeframeData(currentRange, currentPage - 1);
+            }
+        });
 
         document.querySelectorAll('.timeframe-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -608,7 +638,7 @@
                 btn.classList.add('bg-cyan-50', 'text-cyan-600', 'shadow-sm');
                 btn.classList.remove('text-slate-400');
                 
-                fetchTimeframeData(btn.dataset.range);
+                fetchTimeframeData(btn.dataset.range, 1);
             });
         });
 

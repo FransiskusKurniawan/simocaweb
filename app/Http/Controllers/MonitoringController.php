@@ -13,6 +13,10 @@ class MonitoringController extends Controller
     private function fetchHistory(Request $request, $metrics = [])
     {
         $range = $request->get('range', '1h');
+        $page = (int)$request->get('page', 1);
+        if ($page < 1) {
+            $page = 1;
+        }
         $now = Carbon::now();
         
         if ($range === 'custom') {
@@ -21,16 +25,19 @@ class MonitoringController extends Controller
             $startTime = $start ? Carbon::parse($start)->startOfDay() : $now->copy()->subDay();
             $endTime = $end ? Carbon::parse($end)->endOfDay() : $now;
         } else {
-            $startTime = match($range) {
-                '5m' => $now->copy()->subMinutes(5),
-                '1h' => $now->copy()->subHour(),
-                '12h' => $now->copy()->subHours(12),
-                '1d' => $now->copy()->subDay(),
-                '1w' => $now->copy()->subWeek(),
-                '1m' => $now->copy()->subMonth(),
-                default => $now->copy()->subHour(),
+            $durationInMinutes = match($range) {
+                '5m' => 5,
+                '1h' => 60,
+                '12h' => 12 * 60,
+                '1d' => 24 * 60,
+                '1w' => 7 * 24 * 60,
+                '1m' => 30 * 24 * 60,
+                default => 60,
             };
-            $endTime = $now;
+            
+            $offsetMinutes = ($page - 1) * $durationInMinutes;
+            $endTime = $now->copy()->subMinutes($offsetMinutes);
+            $startTime = $endTime->copy()->subMinutes($durationInMinutes);
         }
 
         $isRainfall = in_array('rainfall', $metrics);

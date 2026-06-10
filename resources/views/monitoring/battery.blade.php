@@ -73,6 +73,19 @@
                 <button class="timeframe-btn flex-1 md:flex-none px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600" data-range="1w">1W</button>
                 <button class="timeframe-btn flex-1 md:flex-none px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600" data-range="1m">1M</button>
             </div>
+
+            <!-- Chart Pagination Controls -->
+            <div id="chart-pagination" class="flex items-center gap-1 p-1 bg-white rounded-xl border border-slate-100 shadow-sm">
+                <button id="prev-page-btn" class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                    <span>Older</span>
+                </button>
+                <span id="page-indicator" class="px-3 py-1.5 text-[11px] font-bold text-slate-600">Page 1</span>
+                <button id="next-page-btn" class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1" disabled>
+                    <span>Newer</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
             
             <div class="flex items-center justify-center gap-6 w-full md:w-auto px-2">
                 <div class="flex items-center gap-2">
@@ -285,6 +298,30 @@
                 {
                     seriesName: 'Voltage',
                     title: { text: 'Voltage (V)', style: { color: '#ef4444', fontWeight: 800 } },
+                    min: function(min) {
+                        if (voltageData.length === 0) return 10;
+                        const values = voltageData.map(d => d.y).filter(y => y !== null);
+                        if (values.length === 0) return 10;
+                        const dataMin = Math.min(...values);
+                        const dataMax = Math.max(...values);
+                        const diff = dataMax - dataMin;
+                        if (diff < 5.0) {
+                            return Math.floor((dataMin - (5.0 - diff) / 2) * 10) / 10;
+                        }
+                        return Math.floor((dataMin - diff * 0.1) * 10) / 10;
+                    },
+                    max: function(max) {
+                        if (voltageData.length === 0) return 15;
+                        const values = voltageData.map(d => d.y).filter(y => y !== null);
+                        if (values.length === 0) return 15;
+                        const dataMin = Math.min(...values);
+                        const dataMax = Math.max(...values);
+                        const diff = dataMax - dataMin;
+                        if (diff < 5.0) {
+                            return Math.ceil((dataMax + (5.0 - diff) / 2) * 10) / 10;
+                        }
+                        return Math.ceil((dataMax + diff * 0.1) * 10) / 10;
+                    },
                     labels: {
                         style: { colors: '#ef4444', fontWeight: 600 },
                         formatter: (val) => val.toFixed(1) + ' V'
@@ -385,22 +422,48 @@
             chart.updateOptions(updateObj, false, true);
         };
 
-        const fetchTimeframeData = async (range) => {
+        let currentPage = 1;
+        let currentRange = '1d';
+
+        const updatePaginationUI = () => {
+            const prevBtn = document.getElementById('prev-page-btn');
+            const nextBtn = document.getElementById('next-page-btn');
+            const indicator = document.getElementById('page-indicator');
+            const paginationContainer = document.getElementById('chart-pagination');
+            
+            if (currentRange === 'custom') {
+                if (paginationContainer) paginationContainer.style.display = 'none';
+                return;
+            } else {
+                if (paginationContainer) paginationContainer.style.display = 'flex';
+            }
+            
+            if (indicator) indicator.innerText = `Page ${currentPage}`;
+            if (prevBtn) prevBtn.disabled = false;
+            if (nextBtn) nextBtn.disabled = (currentPage === 1);
+        };
+
+        const fetchTimeframeData = async (range, page = 1) => {
             try {
                 document.querySelector("#battery-chart").style.opacity = '0.5';
-                const response = await fetch(`{{ route('monitoring.battery.history') }}?range=${range}`);
+                const response = await fetch(`{{ route('monitoring.battery.history') }}?range=${range}&page=${page}`);
                 const result = await response.json();
                 
                 if (result.success) {
-                    voltageData = parseHistoryData(result.data, 'voltage_baterai');
-                    currentData = parseHistoryData(result.data, 'current_baterai');
+                    const parsedVoltage = parseHistoryData(result.data, 'voltage_baterai');
+                    const parsedCurrent = parseHistoryData(result.data, 'current_baterai');
+                    if (parsedVoltage.length === 0 && page > 1) {
+                        alert('No older data available for this timeframe.');
+                        return;
+                    }
+                    voltageData = parsedVoltage;
+                    currentData = parsedCurrent;
+                    currentPage = page;
+                    currentRange = range;
+                    updatePaginationUI();
                     
-                    const lastPoint = voltageData.length > 0 ? voltageData[voltageData.length - 1] : null;
-                    const maxDate = lastPoint ? lastPoint.x : Date.now();
-                    const durations = { '5m': 300000, '1h': 3600000, '12h': 43200000, '1d': 86400000, '1w': 604800000, '1m': 2592000000 };
-                    
-                    let minDate = maxDate - (durations[range] || 3600000);
-                    if (range === 'custom') minDate = new Date(result.startTime).getTime();
+                    const maxDate = new Date(result.endTime).getTime();
+                    const minDate = new Date(result.startTime).getTime();
 
                     refreshChart({ 
                         min: minDate, 
@@ -436,7 +499,11 @@
                 b.classList.add('text-slate-400');
             });
 
-            fetchTimeframeData(`custom&start_date=${start}&end_date=${end}`);
+            currentRange = 'custom';
+            currentPage = 1;
+            updatePaginationUI();
+
+            fetchTimeframeData(`custom&start_date=${start}&end_date=${end}`, 1);
         };
 
         document.getElementById('apply-filter').addEventListener('click', fetchCustomRange);
@@ -446,6 +513,15 @@
         startDateInput.addEventListener('change', () => { if (startDateInput.value) endDateInput.min = startDateInput.value; });
         endDateInput.addEventListener('change', () => { if (endDateInput.value) startDateInput.max = endDateInput.value; });
 
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            fetchTimeframeData(currentRange, currentPage + 1);
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                fetchTimeframeData(currentRange, currentPage - 1);
+            }
+        });
 
         document.querySelectorAll('.timeframe-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -455,7 +531,7 @@
                 });
                 btn.classList.add('bg-indigo-50', 'text-indigo-600', 'shadow-sm');
                 btn.classList.remove('text-slate-400');
-                fetchTimeframeData(btn.dataset.range);
+                fetchTimeframeData(btn.dataset.range, 1);
             });
         });
 
