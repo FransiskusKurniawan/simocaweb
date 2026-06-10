@@ -120,7 +120,7 @@
         </div>
 
         <!-- Click Indicator Hint -->
-        <div class="absolute bottom-4 right-8 bg-white/10 border border-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white/85 flex items-center gap-1.5 opacity-80 group-hover:opacity-100 group-hover:bg-white group-hover:text-primary-600 transition-all duration-300 shadow-sm">
+        <div class="absolute bottom-4 right-8 z-20 bg-white/10 border border-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white/85 flex items-center gap-1.5 opacity-80 group-hover:opacity-100 group-hover:bg-white group-hover:text-primary-600 transition-all duration-300 shadow-sm">
             <span class="text-[9px] font-bold uppercase tracking-widest">View Details</span>
             <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
         </div>

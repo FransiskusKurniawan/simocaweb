@@ -87,19 +87,29 @@ class MonitoringController extends Controller
             $stats['val_avg'] = (float)$rainfallHourlyValues->avg() ?? 0.0;
             $stats['total'] = (int)$history->count();
         } else {
+            $selects = ['COUNT(*) as total'];
             foreach ($metrics as $key => $column) {
-                // Check if key contains 'max' or 'avg' to customize
                 if (str_contains($key, 'max')) {
-                    $stats[$key] = (float)(clone $query)->max($column);
+                    $selects[] = "MAX({$column}) as `{$key}`";
                 } elseif (str_contains($key, 'avg')) {
-                    $stats[$key] = (float)(clone $query)->avg($column);
+                    $selects[] = "AVG({$column}) as `{$key}`";
                 } else {
-                    // Default behavior for simple metrics
-                    $stats[$key . '_max'] = (float)(clone $query)->max($column);
-                    $stats[$key . '_avg'] = (float)(clone $query)->avg($column);
+                    $selects[] = "MAX({$column}) as `{$key}_max`";
+                    $selects[] = "AVG({$column}) as `{$key}_avg`";
                 }
             }
-            $stats['total'] = (int)(clone $query)->count();
+            
+            $aggregateResult = (clone $query)->selectRaw(implode(', ', $selects))->first();
+            
+            $stats['total'] = (int)($aggregateResult->total ?? 0);
+            foreach ($metrics as $key => $column) {
+                if (str_contains($key, 'max') || str_contains($key, 'avg')) {
+                    $stats[$key] = (float)($aggregateResult->$key ?? 0.0);
+                } else {
+                    $stats[$key . '_max'] = (float)($aggregateResult->{$key . '_max'} ?? 0.0);
+                    $stats[$key . '_avg'] = (float)($aggregateResult->{$key . '_avg'} ?? 0.0);
+                }
+            }
         }
         
         // Compatibility for simple metrics (rainfall, temp, etc)
@@ -144,10 +154,11 @@ class MonitoringController extends Controller
 
         $rainfallHourlyValues = $history->map(fn($r) => $r->rainfall_hourly);
 
+        $aggregates = SensorData::selectRaw('COUNT(*) as total')->first();
         $globalStats = [
             'max' => (float)$rainfallHourlyValues->max() ?? 0.0,
             'avg' => (float)$rainfallHourlyValues->avg() ?? 0.0,
-            'total' => SensorData::count()
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.rainfall', compact('history', 'latest', 'globalStats'));
     }
@@ -164,10 +175,12 @@ class MonitoringController extends Controller
         $latest = SensorData::orderBy('timertc', 'desc')->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
+        
+        $aggregates = SensorData::selectRaw('MAX(temperature) as max_val, AVG(temperature) as avg_val, COUNT(*) as total')->first();
         $globalStats = [
-            'max' => SensorData::max('temperature') ?? 0,
-            'avg' => SensorData::avg('temperature') ?? 0,
-            'total' => SensorData::count()
+            'max' => (float)($aggregates->max_val ?? 0),
+            'avg' => (float)($aggregates->avg_val ?? 0),
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.temperature', compact('history', 'latest', 'globalStats'));
     }
@@ -184,10 +197,12 @@ class MonitoringController extends Controller
         $latest = SensorData::orderBy('timertc', 'desc')->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
+        
+        $aggregates = SensorData::selectRaw('MAX(humidity) as max_val, AVG(humidity) as avg_val, COUNT(*) as total')->first();
         $globalStats = [
-            'max' => SensorData::max('humidity') ?? 0,
-            'avg' => SensorData::avg('humidity') ?? 0,
-            'total' => SensorData::count()
+            'max' => (float)($aggregates->max_val ?? 0),
+            'avg' => (float)($aggregates->avg_val ?? 0),
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.humidity', compact('history', 'latest', 'globalStats'));
     }
@@ -204,10 +219,12 @@ class MonitoringController extends Controller
         $latest = SensorData::orderBy('timertc', 'desc')->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
+        
+        $aggregates = SensorData::selectRaw('MAX(water_level) as max_val, AVG(water_level) as avg_val, COUNT(*) as total')->first();
         $globalStats = [
-            'max' => SensorData::max('water_level') ?? 0,
-            'avg' => SensorData::avg('water_level') ?? 0,
-            'total' => SensorData::count()
+            'max' => (float)($aggregates->max_val ?? 0),
+            'avg' => (float)($aggregates->avg_val ?? 0),
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.water_level', compact('history', 'latest', 'globalStats'));
     }
@@ -224,10 +241,12 @@ class MonitoringController extends Controller
         $latest = SensorData::orderBy('timertc', 'desc')->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
+        
+        $aggregates = SensorData::selectRaw('MAX(lux) as max_val, AVG(lux) as avg_val, COUNT(*) as total')->first();
         $globalStats = [
-            'max' => SensorData::max('lux') ?? 0,
-            'avg' => SensorData::avg('lux') ?? 0,
-            'total' => SensorData::count()
+            'max' => (float)($aggregates->max_val ?? 0),
+            'avg' => (float)($aggregates->avg_val ?? 0),
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.lux', compact('history', 'latest', 'globalStats'));
     }
@@ -244,12 +263,21 @@ class MonitoringController extends Controller
         $latest = SensorData::orderBy('timertc', 'desc')->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
+        
+        $aggregates = SensorData::selectRaw('
+            MAX(voltage_panel) as max_voltage,
+            MAX(current_panel) as max_current,
+            AVG(voltage_panel) as avg_voltage,
+            AVG(current_panel) as avg_current,
+            COUNT(*) as total
+        ')->first();
+        
         $globalStats = [
-            'max_voltage' => SensorData::max('voltage_panel') ?? 0,
-            'max_current' => SensorData::max('current_panel') ?? 0,
-            'avg_voltage' => SensorData::avg('voltage_panel') ?? 0,
-            'avg_current' => SensorData::avg('current_panel') ?? 0,
-            'total' => SensorData::count()
+            'max_voltage' => (float)($aggregates->max_voltage ?? 0),
+            'max_current' => (float)($aggregates->max_current ?? 0),
+            'avg_voltage' => (float)($aggregates->avg_voltage ?? 0),
+            'avg_current' => (float)($aggregates->avg_current ?? 0),
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.solar_panel', compact('history', 'latest', 'globalStats'));
     }
@@ -271,12 +299,21 @@ class MonitoringController extends Controller
         $latest = SensorData::orderBy('timertc', 'desc')->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
+        
+        $aggregates = SensorData::selectRaw('
+            MAX(voltage_baterai) as max_voltage,
+            MAX(current_baterai) as max_current,
+            AVG(voltage_baterai) as avg_voltage,
+            AVG(current_baterai) as avg_current,
+            COUNT(*) as total
+        ')->first();
+
         $globalStats = [
-            'max_voltage' => SensorData::max('voltage_baterai') ?? 0,
-            'max_current' => SensorData::max('current_baterai') ?? 0,
-            'avg_voltage' => SensorData::avg('voltage_baterai') ?? 0,
-            'avg_current' => SensorData::avg('current_baterai') ?? 0,
-            'total' => SensorData::count()
+            'max_voltage' => (float)($aggregates->max_voltage ?? 0),
+            'max_current' => (float)($aggregates->max_current ?? 0),
+            'avg_voltage' => (float)($aggregates->avg_voltage ?? 0),
+            'avg_current' => (float)($aggregates->avg_current ?? 0),
+            'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.battery', compact('history', 'latest', 'globalStats'));
     }
