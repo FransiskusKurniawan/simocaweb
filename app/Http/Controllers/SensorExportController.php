@@ -118,7 +118,7 @@ class SensorExportController extends Controller
             $sheet->setCellValue('E' . $rowNumber, $row->status); // dynamic status attribute
             $sheet->setCellValue('F' . $rowNumber, $row->temperature);
             $sheet->setCellValue('G' . $rowNumber, $row->humidity);
-            $sheet->setCellValue('H' . $rowNumber, $row->water_level !== null ? ($row->water_level / 100) : null);
+            $sheet->setCellValue('H' . $rowNumber, $row->water_level);
             $sheet->setCellValue('I' . $rowNumber, $row->lux);
             $sheet->setCellValue('J' . $rowNumber, $row->voltage_panel);
             $sheet->setCellValue('K' . $rowNumber, $row->current_panel);
