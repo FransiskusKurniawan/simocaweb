@@ -68,22 +68,21 @@ class SensorExportController extends Controller
         $headers = [
             'A1' => 'No',
             'B1' => 'Timestamp (RTC)',
-            'C1' => 'Created At',
-            'D1' => 'Rainfall (mm/minute)',
-            'E1' => 'Rainfall (mm/hour)',
-            'F1' => 'Rainfall Status',
-            'G1' => 'Temperature (°C)',
-            'H1' => 'Humidity (%)',
-            'I1' => 'Water Level (cm)',
-            'J1' => 'Light (Lux)',
-            'K1' => 'Solar Panel Voltage (V)',
-            'L1' => 'Solar Panel Current (A)',
-            'M1' => 'Battery Voltage (V)',
-            'N1' => 'Battery Current (A)',
-            'O1' => 'Pump 1 Status',
-            'P1' => 'Pump 2 Status',
-            'Q1' => 'Jitter (ms)',
-            'R1' => 'Delay (ms)',
+            'C1' => 'Rainfall (mm/minute)',
+            'D1' => 'Rainfall (mm/hour)',
+            'E1' => 'Rainfall Status',
+            'F1' => 'Temperature (°C)',
+            'G1' => 'Humidity (%)',
+            'H1' => 'Water Level (m)',
+            'I1' => 'Light (Lux)',
+            'J1' => 'Solar Panel Voltage (V)',
+            'K1' => 'Solar Panel Current (A)',
+            'L1' => 'Battery Voltage (V)',
+            'M1' => 'Battery Current (A)',
+            'N1' => 'Pump 1 Status',
+            'O1' => 'Pump 2 Status',
+            'P1' => 'Jitter (ms)',
+            'Q1' => 'Delay (ms)',
         ];
 
         foreach ($headers as $cell => $value) {
@@ -106,7 +105,7 @@ class SensorExportController extends Controller
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ];
-        $sheet->getStyle('A1:R1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:Q1')->applyFromArray($headerStyle);
         $sheet->getRowDimension(1)->setRowHeight(30);
 
         // Populate Data Rows
@@ -114,29 +113,27 @@ class SensorExportController extends Controller
         foreach ($data as $index => $row) {
             $sheet->setCellValue('A' . $rowNumber, $index + 1);
             $sheet->setCellValue('B' . $rowNumber, $row->timertc);
-            $sheet->setCellValue('C' . $rowNumber, $row->created_at ? $row->created_at->format('Y-m-d H:i:s') : '-');
-            $sheet->setCellValue('D' . $rowNumber, $row->rainfall);
-            $sheet->setCellValue('E' . $rowNumber, $row->rainfall_hourly);
-            $sheet->setCellValue('F' . $rowNumber, $row->status); // dynamic status attribute
-            $sheet->setCellValue('G' . $rowNumber, $row->temperature);
-            $sheet->setCellValue('H' . $rowNumber, $row->humidity);
-            $sheet->setCellValue('I' . $rowNumber, $row->water_level);
-            $sheet->setCellValue('J' . $rowNumber, $row->lux);
-            $sheet->setCellValue('K' . $rowNumber, $row->voltage_panel);
-            $sheet->setCellValue('L' . $rowNumber, $row->current_panel);
-            $sheet->setCellValue('M' . $rowNumber, $row->voltage_baterai);
-            $sheet->setCellValue('N' . $rowNumber, $row->current_baterai);
-            $sheet->setCellValue('O' . $rowNumber, $row->status_pompa ? 'Active' : 'Offline');
-            $sheet->setCellValue('P' . $rowNumber, $row->status_pompa2 ? 'Active' : 'Offline');
-            $sheet->setCellValue('Q' . $rowNumber, $row->jitter ?? 0);
-            $sheet->setCellValue('R' . $rowNumber, $row->delay ?? 0);
+            $sheet->setCellValue('C' . $rowNumber, $row->rainfall);
+            $sheet->setCellValue('D' . $rowNumber, $row->rainfall_hourly);
+            $sheet->setCellValue('E' . $rowNumber, $row->status); // dynamic status attribute
+            $sheet->setCellValue('F' . $rowNumber, $row->temperature);
+            $sheet->setCellValue('G' . $rowNumber, $row->humidity);
+            $sheet->setCellValue('H' . $rowNumber, $row->water_level !== null ? ($row->water_level / 100) : null);
+            $sheet->setCellValue('I' . $rowNumber, $row->lux);
+            $sheet->setCellValue('J' . $rowNumber, $row->voltage_panel);
+            $sheet->setCellValue('K' . $rowNumber, $row->current_panel);
+            $sheet->setCellValue('L' . $rowNumber, $row->voltage_baterai);
+            $sheet->setCellValue('M' . $rowNumber, $row->current_baterai);
+            $sheet->setCellValue('N' . $rowNumber, $row->status_pompa ? 'Active' : 'Offline');
+            $sheet->setCellValue('O' . $rowNumber, $row->status_pompa2 ? 'Active' : 'Offline');
+            $sheet->setCellValue('P' . $rowNumber, $row->jitter ?? 0);
+            $sheet->setCellValue('Q' . $rowNumber, $row->delay ?? 0);
 
             // Alignment styles
             $sheet->getStyle('A' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('B' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('C' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('N' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('O' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('P' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             // Add thin borders to row
             $rowStyle = [
@@ -147,13 +144,13 @@ class SensorExportController extends Controller
                     ],
                 ],
             ];
-            $sheet->getStyle('A' . $rowNumber . ':R' . $rowNumber)->applyFromArray($rowStyle);
+            $sheet->getStyle('A' . $rowNumber . ':Q' . $rowNumber)->applyFromArray($rowStyle);
             
             $rowNumber++;
         }
 
         // Auto-fit columns
-        foreach (range('A', 'R') as $col) {
+        foreach (range('A', 'Q') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
