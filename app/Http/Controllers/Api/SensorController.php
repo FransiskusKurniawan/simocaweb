@@ -20,11 +20,48 @@ class SensorController extends Controller
     // Simpan data
     public function store(Request $request)
     {
+        // Get the latest existing record to compare status
+        $previousData = SensorData::latest()->first();
+
         $data = SensorData::create($request->all());
         
         // Eagerly calculate hourly rainfall and status to cache them before serialization/broadcasting
         $data->rainfall_hourly;
         $data->status;
+
+        // Detect transitions: false/0 -> true/1
+        if ($previousData) {
+            $pump1Transition = (!$previousData->status_pompa && $data->status_pompa);
+            $pump2Transition = (!$previousData->status_pompa2 && $data->status_pompa2);
+
+            if ($pump1Transition || $pump2Transition) {
+                $pumps = [];
+                if ($pump1Transition) $pumps[] = 'Pump 1';
+                if ($pump2Transition) $pumps[] = 'Pump 2';
+                $pumpNames = implode(' and ', $pumps);
+
+                try {
+                    // Save notification to the database
+                    \App\Models\Notification::create([
+                        'title' => '🚨 Pump Activated',
+                        'body' => "The water pump ({$pumpNames}) has been switched ON. Please monitor the system status.",
+                        'type' => 'pump',
+                        'is_read' => false
+                    ]);
+
+                    \App\Services\FcmNotificationService::sendToAll(
+                        '🚨 Pump Activated',
+                        "The water pump ({$pumpNames}) has been switched ON. Please monitor the system status.",
+                        [
+                            'pump_event' => 'activated',
+                            'pumps' => $pumps,
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    \Log::error('FCM dispatch failed: ' . $e->getMessage());
+                }
+            }
+        }
         
         // Dispatch event for real-time update (wrapped in try-catch to prevent crash if websocket is offline)
         try {

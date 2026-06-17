@@ -334,10 +334,88 @@
     </div>
     @endif
 
-</div>
+<div id="toast-container" class="fixed bottom-20 md:bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        // Pump states initialized from current page load database data
+        let lastPump1Status = {{ $latestData && $latestData->status_pompa ? 'true' : 'false' }};
+        let lastPump2Status = {{ $latestData && $latestData->status_pompa2 ? 'true' : 'false' }};
+
+        // Trigger browser notification
+        function triggerBrowserNotification(title, body) {
+            if (!("Notification" in window)) return;
+            
+            if (Notification.permission === "granted") {
+                new Notification(title, { body, icon: '/images/logosimocanobg.png' });
+            }
+        }
+
+        // Show elegant custom toast notification
+        function showToastNotification(title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto bg-white/95 border border-slate-100 shadow-2xl rounded-2xl p-4 flex gap-3.5 items-start animate__animated animate__fadeInUp duration-300';
+            toast.style.backdropFilter = 'blur(10px)';
+            
+            toast.innerHTML = `
+                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner">
+                    <i data-lucide="bell" class="w-5 h-5"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-black text-slate-800 tracking-tight leading-none mb-1">${title}</h4>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">${message}</p>
+                </div>
+                <button class="text-slate-400 hover:text-slate-600 p-0.5 rounded-lg hover:bg-slate-50 transition-all self-start">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            `;
+
+            // Hook close button
+            const closeBtn = toast.querySelector('button');
+            closeBtn.addEventListener('click', () => {
+                toast.classList.replace('animate__fadeInUp', 'animate__fadeOutDown');
+                setTimeout(() => toast.remove(), 500);
+            });
+
+            container.appendChild(toast);
+            
+            // Auto-create icons for the toast
+            if (window.lucide) {
+                window.lucide.createIcons({
+                    attrs: {
+                        class: 'w-4 h-4'
+                    },
+                    nameAttr: 'data-lucide',
+                    nodeList: toast.querySelectorAll('[data-lucide]')
+                });
+            }
+
+            // Auto dismiss after 6 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.classList.replace('animate__fadeInUp', 'animate__fadeOutDown');
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 6000);
+        }
+
+        // Request browser Notification permission on bell icon click
+        const bellBtn = document.getElementById('header-bell-button');
+        if (bellBtn) {
+            bellBtn.addEventListener('click', () => {
+                if ("Notification" in window) {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            showToastNotification('System Alert', 'Browser push notifications enabled!');
+                        }
+                    });
+                }
+            });
+        }
+
         // Video Fade-In Logic (blurred image shown until video is ready)
         const video = document.getElementById('rainfall-video');
         const bgImage = document.getElementById('rainfall-bg-image');
@@ -474,10 +552,17 @@
                     const pumpCard = document.getElementById('pump-status-card');
                     const pumpIcon = document.getElementById('pump-status-icon');
                     const pumpText = document.getElementById('pump-status-text');
+                    const isActive = data.status_pompa === true || data.status_pompa === 1 || data.status_pompa === '1' || data.status_pompa === 'true';
+                    
+                    if (isActive && !lastPump1Status) {
+                        const title = '🚨 Pump Activated';
+                        const body = 'The water pump (Pump 1) has been switched ON. Please monitor the system status.';
+                        triggerBrowserNotification(title, body);
+                        showToastNotification(title, body);
+                    }
+                    lastPump1Status = isActive;
                     
                     if (pumpCard && pumpIcon && pumpText) {
-                        const isActive = data.status_pompa === true || data.status_pompa === 1 || data.status_pompa === '1' || data.status_pompa === 'true';
-                        
                         // Card classes
                         pumpCard.classList.toggle('bg-emerald-500', isActive);
                         pumpCard.classList.toggle('bg-slate-500', !isActive);
@@ -501,10 +586,17 @@
                     const pumpCard2 = document.getElementById('pump-status-card-2');
                     const pumpIcon2 = document.getElementById('pump-status-icon-2');
                     const pumpText2 = document.getElementById('pump-status-text-2');
+                    const isActive2 = data.status_pompa2 === true || data.status_pompa2 === 1 || data.status_pompa2 === '1' || data.status_pompa2 === 'true';
+                    
+                    if (isActive2 && !lastPump2Status) {
+                        const title = '🚨 Pump Activated';
+                        const body = 'The water pump (Pump 2) has been switched ON. Please monitor the system status.';
+                        triggerBrowserNotification(title, body);
+                        showToastNotification(title, body);
+                    }
+                    lastPump2Status = isActive2;
                     
                     if (pumpCard2 && pumpIcon2 && pumpText2) {
-                        const isActive2 = data.status_pompa2 === true || data.status_pompa2 === 1 || data.status_pompa2 === '1' || data.status_pompa2 === 'true';
-                        
                         pumpCard2.classList.toggle('bg-emerald-500', isActive2);
                         pumpCard2.classList.toggle('bg-slate-500', !isActive2);
                         pumpCard2.classList.toggle('shadow-emerald-500/20', isActive2);

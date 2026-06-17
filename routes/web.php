@@ -54,4 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/setting/username', [AuthWebController::class, 'showChangeUsername'])->name('change-username');
     Route::post('/setting/username', [AuthWebController::class, 'updateUsername'])->name('update-username');
     Route::post('/setting/photo', [AuthWebController::class, 'uploadProfilePhoto'])->name('upload-photo');
+
+    Route::get('/notification', [App\Http\Controllers\NotificationController::class, 'index'])->name('notification.index');
+    Route::post('/notification/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notification.read-all');
 });

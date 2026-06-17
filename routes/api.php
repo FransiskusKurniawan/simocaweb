@@ -29,3 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/sensor', [SensorController::class, 'index']);
 Route::post('/sensor', [SensorController::class, 'store']);
+
+Route::post('/fcm/register', [App\Http\Controllers\Api\FcmTokenController::class, 'register']);
+

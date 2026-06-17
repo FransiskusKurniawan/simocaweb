@@ -112,10 +112,22 @@
 
         <div class="ml-auto flex items-center gap-4" x-data="{ isOpen: false }">
             <!-- Notifications (Optional) -->
-            <button class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors relative">
+            @php
+                // Wrap in try-catch to prevent crash if table does not exist yet
+                try {
+                    $unreadCount = \App\Models\Notification::where('is_read', false)->count();
+                } catch (\Exception $e) {
+                    $unreadCount = 0;
+                }
+            @endphp
+            <a href="{{ route('notification.index') }}" class="w-10 h-10 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-100 transition-colors relative">
                 <i data-lucide="bell" class="w-5 h-5"></i>
-                <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
+                @if($unreadCount > 0)
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
+                        {{ $unreadCount > 99 ? '99+' : $unreadCount }}
+                    </span>
+                @endif
+            </a>
             
             <!-- Burger Menu Dropdown -->
             <div class="relative">
