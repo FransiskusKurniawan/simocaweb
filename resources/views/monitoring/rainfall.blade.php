@@ -46,7 +46,7 @@
                 <div class="text-right">
                     <div class="flex items-baseline justify-end gap-1.5">
                         <span class="text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall_hourly ?? 0, 2) }}</span>
-                        <span class="text-sm font-bold text-slate-400">mm/minute</span>
+                        <span class="text-sm font-bold text-slate-400">mm/hour</span>
                     </div>
                     <div class="text-[10px] font-semibold text-slate-400 mt-1 flex items-center justify-end gap-1">
                         <span>Raw sensor input:</span>
@@ -142,7 +142,7 @@
             </div>
             <div class="flex items-baseline gap-1">
                 <span class="text-3xl font-black text-slate-800" id="stat-max">{{ number_format($globalStats['max'], 1) }}</span>
-                <span class="text-xs font-bold text-slate-400">mm/minute</span>
+                <span class="text-xs font-bold text-slate-400">mm/hour</span>
             </div>
         </div>
 
@@ -203,7 +203,7 @@
                     }
                     
                     const timestamp = date.getTime();
-                    const rainfallValue = item.rainfall_hourly !== undefined && item.rainfall_hourly !== null ? parseFloat(item.rainfall_hourly) : null;
+                    const rainfallValue = item.rainfall !== undefined && item.rainfall !== null ? parseFloat(item.rainfall) : null;
 
                     return {
                         x: timestamp,
@@ -696,7 +696,7 @@
 
                     // Update local data array with duplicate check
                     if (!chartData.some(d => d.x === timestamp)) {
-                        chartData.push({ x: timestamp, y: Number.isFinite(rainfallValue) ? rainfallValue : null });
+                        chartData.push({ x: timestamp, y: Number.isFinite(rawRainfallValue) ? rawRainfallValue : null });
                         // Sort chronologically from left to right
                         chartData.sort((a, b) => a.x - b.x);
                         

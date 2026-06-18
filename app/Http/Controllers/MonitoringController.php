@@ -133,7 +133,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         
         $queryStartTime = $startTime->copy()->subHour();
         $historyRaw = SensorData::where('timertc', '>=', $queryStartTime->format('Y-m-d H:i:s'))
@@ -172,7 +172,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
@@ -194,7 +194,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
@@ -216,7 +216,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
@@ -238,7 +238,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
@@ -260,7 +260,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
@@ -296,7 +296,7 @@ class MonitoringController extends Controller
     {
         $now = Carbon::now();
         $startTime = $now->copy()->subDay();
-        $latest = SensorData::orderBy('timertc', 'desc')->first();
+        $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
