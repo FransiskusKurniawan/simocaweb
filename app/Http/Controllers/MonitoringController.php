@@ -174,6 +174,7 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
         $aggregates = SensorData::selectRaw('MAX(temperature) as max_val, AVG(temperature) as avg_val, COUNT(*) as total')->first();
@@ -196,6 +197,7 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
         $aggregates = SensorData::selectRaw('MAX(humidity) as max_val, AVG(humidity) as avg_val, COUNT(*) as total')->first();
@@ -218,6 +220,7 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
         $aggregates = SensorData::selectRaw('MAX(water_level) as max_val, AVG(water_level) as avg_val, COUNT(*) as total')->first();
@@ -240,6 +243,7 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
         $aggregates = SensorData::selectRaw('MAX(lux) as max_val, AVG(lux) as avg_val, COUNT(*) as total')->first();
@@ -262,6 +266,7 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
         $aggregates = SensorData::selectRaw('
@@ -298,6 +303,7 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1000)->get()->reverse()->values();
         
         $aggregates = SensorData::selectRaw('

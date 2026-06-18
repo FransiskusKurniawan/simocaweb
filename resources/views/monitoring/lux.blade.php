@@ -391,16 +391,10 @@
         chart.render();
 
         let currentGlobalStats = @json($globalStats);
-        setTimeout(() => updateSummary(currentGlobalStats), 100);
+        // Auto-fetch fresh 1D data from API on page load (ensures chart matches dashboard)
+        setTimeout(() => fetchTimeframeData('1d', 1), 200);
 
         const updateSummary = (globalData = null) => {
-            const values = chartData.map(d => d.y).filter(v => v !== null);
-            const lastPoint = chartData.length > 0 ? chartData[chartData.length - 1] : null;
-            
-            const largeDisplay = document.getElementById('current-lux-large');
-            if (largeDisplay && lastPoint) {
-                largeDisplay.innerText = Math.round(lastPoint.y).toLocaleString('id-ID');
-            }
 
             if (globalData) {
                 if (document.getElementById('stat-max')) document.getElementById('stat-max').innerText = Math.round(globalData.max).toLocaleString('id-ID');
@@ -451,7 +445,23 @@
                 }
             };
 
-            if (xaxisOptions) {
+            if (!xaxisOptions && lastPoint && currentRange !== 'custom') {
+                const durationMap = {
+                    '5m': 5 * 60 * 1000,
+                    '1h': 60 * 60 * 1000,
+                    '12h': 12 * 60 * 60 * 1000,
+                    '1d': 24 * 60 * 60 * 1000,
+                    '1w': 7 * 24 * 60 * 60 * 1000,
+                    '1m': 30 * 24 * 60 * 60 * 1000
+                };
+                const duration = durationMap[currentRange];
+                if (duration) {
+                    updateObj.xaxis = {
+                        min: lastPoint.x - duration,
+                        max: lastPoint.x
+                    };
+                }
+            } else if (xaxisOptions) {
                 updateObj.xaxis = xaxisOptions;
             }
 

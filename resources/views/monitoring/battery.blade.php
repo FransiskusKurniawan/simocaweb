@@ -390,18 +390,10 @@
         chart.render();
 
         let currentGlobalStats = @json($globalStats);
-        setTimeout(() => updateSummary(currentGlobalStats), 100);
+        // Auto-fetch fresh 1D data from API on page load (ensures chart matches dashboard)
+        setTimeout(() => fetchTimeframeData('1d', 1), 200);
 
         const updateSummary = (globalData = null) => {
-            const lastV = voltageData.length > 0 ? voltageData[voltageData.length - 1] : null;
-            const lastA = currentData.length > 0 ? currentData[currentData.length - 1] : null;
-            
-            if (document.getElementById('current-voltage-large') && lastV) {
-                document.getElementById('current-voltage-large').innerText = lastV.y.toFixed(1);
-            }
-            if (document.getElementById('current-current-large') && lastA) {
-                document.getElementById('current-current-large').innerText = lastA.y.toFixed(2);
-            }
 
             if (globalData) {
                 if (document.getElementById('stat-max-v')) document.getElementById('stat-max-v').innerText = globalData.max_v.toFixed(1);
@@ -412,13 +404,32 @@
         };
 
         const refreshChart = (xaxisOptions = null) => {
+            const lastPoint = voltageData.length > 0 ? voltageData[voltageData.length - 1] : null;
             const updateObj = {
                 series: [
                     { name: 'Voltage', data: voltageData },
                     { name: 'Current', data: currentData }
                 ]
             };
-            if (xaxisOptions) updateObj.xaxis = xaxisOptions;
+            if (!xaxisOptions && lastPoint && currentRange !== 'custom') {
+                const durationMap = {
+                    '5m': 5 * 60 * 1000,
+                    '1h': 60 * 60 * 1000,
+                    '12h': 12 * 60 * 60 * 1000,
+                    '1d': 24 * 60 * 60 * 1000,
+                    '1w': 7 * 24 * 60 * 60 * 1000,
+                    '1m': 30 * 24 * 60 * 60 * 1000
+                };
+                const duration = durationMap[currentRange];
+                if (duration) {
+                    updateObj.xaxis = {
+                        min: lastPoint.x - duration,
+                        max: lastPoint.x
+                    };
+                }
+            } else if (xaxisOptions) {
+                updateObj.xaxis = xaxisOptions;
+            }
             chart.updateOptions(updateObj, false, true);
         };
 
