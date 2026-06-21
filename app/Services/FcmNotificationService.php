@@ -77,11 +77,13 @@ class FcmNotificationService
                             'title' => $title,
                             'body' => $body,
                         ],
-                        'data' => array_merge([
+                        'data' => array_map(function($val) {
+                            return is_array($val) ? json_encode($val) : (string)$val;
+                        }, array_merge([
                             'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                             'title' => $title,
                             'body' => $body,
-                        ], $data),
+                        ], $data)),
                         'android' => [
                             'priority' => 'high',
                             'notification' => [
@@ -197,11 +199,13 @@ class FcmNotificationService
                 'sound' => 'default',
                 'badge' => '1',
             ],
-            'data' => array_merge([
+            'data' => array_map(function($val) {
+                return is_array($val) ? json_encode($val) : (string)$val;
+            }, array_merge([
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
                 'title' => $title,
                 'body' => $body,
-            ], $data),
+            ], $data)),
             'priority' => 'high',
         ];
 
