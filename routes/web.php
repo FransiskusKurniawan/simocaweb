@@ -30,8 +30,8 @@ Route::post('/login', [AuthWebController::class, 'login']);
 Route::get('/test-fcm-push', function() {
     try {
         \App\Services\FcmNotificationService::sendToAll(
-            '🚨 Test Pompa Aktif',
-            'Ini adalah notifikasi uji coba untuk pompa air SIMOCA.'
+            '🚨 Pump Activated',
+            'The water pump (Pump 1) has been switched ON'
         );
         return response()->json([
             'success' => true,
