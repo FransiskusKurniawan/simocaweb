@@ -27,6 +27,23 @@ Route::get('/login', [AuthWebController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthWebController::class, 'login']);
 // Route::get('/register', [AuthWebController::class, 'showRegister'])->name('register');
 // Route::post('/register', [AuthWebController::class, 'register']);
+Route::get('/test-fcm-push', function() {
+    try {
+        \App\Services\FcmNotificationService::sendToAll(
+            '🚨 Test Pompa Aktif',
+            'Ini adalah notifikasi uji coba untuk pompa air SIMOCA.'
+        );
+        return response()->json([
+            'success' => true,
+            'message' => 'Test push notification dispatched successfully.'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
 Route::post('/logout', [AuthWebController::class, 'logout'])->name('logout');
 
 Route::middleware('auth')->group(function () {
