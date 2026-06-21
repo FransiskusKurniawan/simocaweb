@@ -44,14 +44,14 @@ class SensorController extends Controller
                     // Save notification to the database
                     \App\Models\Notification::create([
                         'title' => '🚨 Pump Activated',
-                        'body' => "The water pump ({$pumpNames}) has been switched ON. Please monitor the system status.",
+                        'body' => "The water pump ({$pumpNames}) has been switched ON",
                         'type' => 'pump',
                         'is_read' => false
                     ]);
 
                     \App\Services\FcmNotificationService::sendToAll(
                         '🚨 Pump Activated',
-                        "The water pump ({$pumpNames}) has been switched ON. Please monitor the system status.",
+                        "The water pump ({$pumpNames}) has been switched ON",
                         [
                             'pump_event' => 'activated',
                             'pumps' => $pumps,

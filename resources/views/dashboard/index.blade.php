@@ -556,7 +556,7 @@
                     
                     if (isActive && !lastPump1Status) {
                         const title = '🚨 Pump Activated';
-                        const body = 'The water pump (Pump 1) has been switched ON. Please monitor the system status.';
+                        const body = 'The water pump (Pump 1) has been switched ON';
                         triggerBrowserNotification(title, body);
                         showToastNotification(title, body);
                     }
@@ -590,7 +590,7 @@
                     
                     if (isActive2 && !lastPump2Status) {
                         const title = '🚨 Pump Activated';
-                        const body = 'The water pump (Pump 2) has been switched ON. Please monitor the system status.';
+                        const body = 'The water pump (Pump 2) has been switched ON';
                         triggerBrowserNotification(title, body);
                         showToastNotification(title, body);
                     }
