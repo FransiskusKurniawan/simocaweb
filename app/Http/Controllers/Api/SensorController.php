@@ -36,22 +36,22 @@ class SensorController extends Controller
 
             if ($pump1Transition || $pump2Transition) {
                 $pumps = [];
-                if ($pump1Transition) $pumps[] = 'Pump 1';
-                if ($pump2Transition) $pumps[] = 'Pump 2';
-                $pumpNames = implode(' and ', $pumps);
+                if ($pump1Transition) $pumps[] = 'Pompa 1';
+                if ($pump2Transition) $pumps[] = 'Pompa 2';
+                $pumpNames = implode(' dan ', $pumps);
 
                 try {
                     // Save notification to the database
                     \App\Models\Notification::create([
-                        'title' => '🚨 Pump Activated',
-                        'body' => "The water pump ({$pumpNames}) has been switched ON",
+                        'title' => '🚨 Pompa Diaktifkan',
+                        'body' => "Pompa air ({$pumpNames}) telah dinyalakan",
                         'type' => 'pump',
                         'is_read' => false
                     ]);
 
                     \App\Services\FcmNotificationService::sendToAll(
-                        '🚨 Pump Activated',
-                        "The water pump ({$pumpNames}) has been switched ON",
+                        '🚨 Pompa Diaktifkan',
+                        "Pompa air ({$pumpNames}) telah dinyalakan",
                         [
                             'pump_event' => 'activated',
                             'pumps' => $pumps,
