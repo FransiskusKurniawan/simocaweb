@@ -74,18 +74,7 @@
                 <button class="timeframe-btn flex-1 md:flex-none px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600" data-range="1m">1M</button>
             </div>
 
-            <!-- Chart Pagination Controls -->
-            <div id="chart-pagination" class="flex items-center gap-1 p-1 bg-white rounded-xl border border-slate-100 shadow-sm">
-                <button id="prev-page-btn" class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1">
-                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
-                    <span>Older</span>
-                </button>
-                <span id="page-indicator" class="px-3 py-1.5 text-[11px] font-bold text-slate-600">Page 1</span>
-                <button id="next-page-btn" class="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all text-slate-400 hover:text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1" disabled>
-                    <span>Newer</span>
-                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </button>
-            </div>
+
             
             <div class="flex items-center justify-center gap-6 w-full md:w-auto px-2">
                 <div class="flex items-center gap-2">
@@ -443,11 +432,13 @@
             const indicator = document.getElementById('page-indicator');
             const paginationContainer = document.getElementById('chart-pagination');
             
-            if (currentRange === 'custom') {
-                if (paginationContainer) paginationContainer.style.display = 'none';
-                return;
-            } else {
-                if (paginationContainer) paginationContainer.style.display = 'flex';
+            if (paginationContainer) {
+                if (currentRange === 'custom') {
+                    paginationContainer.style.display = 'none';
+                    return;
+                } else {
+                    paginationContainer.style.display = 'flex';
+                }
             }
             
             if (indicator) indicator.innerText = `Page ${currentPage}`;
@@ -591,15 +582,21 @@
         endDateInput.addEventListener('change', () => { if (endDateInput.value) startDateInput.max = endDateInput.value; });
 
 
-        document.getElementById('prev-page-btn').addEventListener('click', () => {
-            fetchTimeframeData(currentRange, currentPage + 1);
-        });
+        const prevBtn = document.getElementById('prev-page-btn');
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                fetchTimeframeData(currentRange, currentPage + 1);
+            });
+        }
 
-        document.getElementById('next-page-btn').addEventListener('click', () => {
-            if (currentPage > 1) {
-                fetchTimeframeData(currentRange, currentPage - 1);
-            }
-        });
+        const nextBtn = document.getElementById('next-page-btn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    fetchTimeframeData(currentRange, currentPage - 1);
+                }
+            });
+        }
 
         document.querySelectorAll('.timeframe-btn').forEach(btn => {
             btn.addEventListener('click', () => {
