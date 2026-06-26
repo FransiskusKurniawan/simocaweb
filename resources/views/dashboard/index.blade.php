@@ -315,7 +315,7 @@
                     </div>
                     <div>
                         <p class="text-[8px] font-bold text-slate-400 uppercase leading-none">Pump 1</p>
-                        <p id="pump-status-text" class="text-xs font-black uppercase text-{{ $latestData->status_pompa ? 'emerald' : 'slate' }}-400">{{ $latestData->status_pompa ? 'Active' : 'Offline' }}</p>
+                        <p id="pump-status-text" class="text-xs font-black uppercase text-{{ $latestData->status_pompa ? 'emerald' : 'slate' }}-400">{{ $latestData->status_pompa ? 'Active' : 'Off' }}</p>
                     </div>
                 </div>
 
@@ -326,7 +326,7 @@
                     </div>
                     <div>
                         <p class="text-[8px] font-bold text-slate-400 uppercase leading-none">Pump 2</p>
-                        <p id="pump-status-text-2" class="text-xs font-black uppercase text-{{ $latestData->status_pompa2 ? 'emerald' : 'slate' }}-400">{{ $latestData->status_pompa2 ? 'Active' : 'Offline' }}</p>
+                        <p id="pump-status-text-2" class="text-xs font-black uppercase text-{{ $latestData->status_pompa2 ? 'emerald' : 'slate' }}-400">{{ $latestData->status_pompa2 ? 'Active' : 'Off' }}</p>
                     </div>
                 </div>
             </div>
@@ -577,7 +577,7 @@
                         }
                         
                         // Text and color
-                        pumpText.innerText = isActive ? 'Active' : 'Offline';
+                        pumpText.innerText = isActive ? 'Active' : 'Off';
                         pumpText.classList.toggle('text-emerald-400', isActive);
                         pumpText.classList.toggle('text-slate-400', !isActive);
                     }
@@ -608,7 +608,7 @@
                             pumpIcon2.classList.remove('animate-spin');
                         }
                         
-                        pumpText2.innerText = isActive2 ? 'Active' : 'Offline';
+                        pumpText2.innerText = isActive2 ? 'Active' : 'Off';
                         pumpText2.classList.toggle('text-emerald-400', isActive2);
                         pumpText2.classList.toggle('text-slate-400', !isActive2);
                     }
