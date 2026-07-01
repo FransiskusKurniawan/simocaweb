@@ -174,6 +174,41 @@
                 <span class="text-2xl font-black text-slate-800" id="water-level-value">{{ $latestData->water_level }}</span>
                 <span class="text-xs font-bold text-slate-500">m</span>
             </div>
+            
+            @php
+                $wl = floatval($latestData->water_level);
+                $isHigh = ($wl <= 1.50);
+                $isMedium = ($wl > 1.50 && $wl <= 1.90);
+                $isNormal = ($wl > 1.90);
+            @endphp
+
+            <!-- Status Badges Grid -->
+            <div class="grid grid-cols-3 gap-1 mt-3">
+                <!-- NORMAL Badge -->
+                <div id="wl-badge-normal" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider
+                    {{ $isNormal 
+                        ? 'bg-[#22C55E] text-white shadow-[0_0_12px_rgba(34,197,94,0.6)] scale-[1.03] border border-[#22C55E]' 
+                        : 'bg-transparent text-[#22C55E] border border-green-500/20 opacity-50' 
+                    }}">
+                    NORMAL
+                </div>
+                <!-- MEDIUM Badge -->
+                <div id="wl-badge-medium" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider
+                    {{ $isMedium 
+                        ? 'bg-[#F59E0B] text-white shadow-[0_0_12px_rgba(245,158,11,0.6)] scale-[1.03] border border-[#F59E0B]' 
+                        : 'bg-transparent text-[#F59E0B] border border-amber-500/20 opacity-50' 
+                    }}">
+                    MEDIUM
+                </div>
+                <!-- HIGH Badge -->
+                <div id="wl-badge-high" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider
+                    {{ $isHigh 
+                        ? 'bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.6)] scale-[1.03] border border-[#EF4444]' 
+                        : 'bg-transparent text-[#EF4444] border border-red-500/20 opacity-50' 
+                    }}">
+                    HIGH
+                </div>
+            </div>
         </a>
 
         <!-- Lux -->
@@ -500,6 +535,39 @@
                             el.classList.add('animate__animated', 'animate__flash');
                             setTimeout(() => el.classList.remove('animate__animated', 'animate__flash'), 1000);
                             el.innerText = value;
+                        }
+                    }
+
+                    // Update Water Level Status Badges
+                    const wl = parseFloat(data.water_level);
+                    const badgeNormal = document.getElementById('wl-badge-normal');
+                    const badgeMedium = document.getElementById('wl-badge-medium');
+                    const badgeHigh = document.getElementById('wl-badge-high');
+
+                    if (badgeNormal && badgeMedium && badgeHigh) {
+                        const isHigh = (wl <= 1.50);
+                        const isMedium = (wl > 1.50 && wl <= 1.90);
+                        const isNormal = (wl > 1.90);
+
+                        // Normal
+                        if (isNormal) {
+                            badgeNormal.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider bg-[#22C55E] text-white shadow-[0_0_12px_rgba(34,197,94,0.6)] scale-[1.03] border border-[#22C55E]";
+                        } else {
+                            badgeNormal.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider bg-transparent text-[#22C55E] border border-green-500/20 opacity-50";
+                        }
+
+                        // Medium
+                        if (isMedium) {
+                            badgeMedium.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider bg-[#F59E0B] text-white shadow-[0_0_12px_rgba(245,158,11,0.6)] scale-[1.03] border border-[#F59E0B]";
+                        } else {
+                            badgeMedium.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider bg-transparent text-[#F59E0B] border border-amber-500/20 opacity-50";
+                        }
+
+                        // High
+                        if (isHigh) {
+                            badgeHigh.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.6)] scale-[1.03] border border-[#EF4444]";
+                        } else {
+                            badgeHigh.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider bg-transparent text-[#EF4444] border border-red-500/20 opacity-50";
                         }
                     }
 
