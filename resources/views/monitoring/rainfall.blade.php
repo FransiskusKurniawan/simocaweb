@@ -29,33 +29,33 @@
     <div class="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden flex flex-col transition-all">
         <!-- Header -->
         <div class="p-6 md:p-8 border-b border-slate-50">
-            <div class="flex items-start justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center">
-                        <i data-lucide="cloud-rain" class="w-6 h-6"></i>
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-primary-50 text-primary-600 rounded-2xl flex items-center justify-center shrink-0">
+                        <i data-lucide="cloud-rain" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                     </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-xl font-black text-slate-800 tracking-tight">Rainfall Intensity</h3>
-                            <span class="px-2 py-0.5 bg-green-100 text-[10px] font-bold text-green-600 rounded-lg uppercase tracking-wider">LIVE</span>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <h3 class="text-sm sm:text-xl font-black text-slate-800 tracking-tight truncate">Rainfall Intensity</h3>
+                            <span class="px-1.5 py-0.5 bg-green-100 text-[8px] sm:text-[10px] font-bold text-green-600 rounded-lg uppercase tracking-wider shrink-0">LIVE</span>
                         </div>
-                        <p class="text-xs font-medium text-slate-400">Atmospheric precipitation monitoring</p>
+                        <p class="text-[10px] sm:text-xs font-medium text-slate-400 truncate">Atmospheric precipitation monitoring</p>
                     </div>
                 </div>
 
-                <div class="text-right">
-                    <div class="flex items-baseline justify-end gap-1.5">
-                        <span class="text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall_hourly ?? 0, 2) }}</span>
-                        <span class="text-sm font-bold text-slate-400">mm/hour</span>
+                <div class="text-right shrink-0">
+                    <div class="flex items-baseline justify-end gap-1 whitespace-nowrap">
+                        <span class="text-2xl sm:text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall_hourly ?? 0, 2) }}</span>
+                        <span class="text-xs sm:text-sm font-bold text-slate-400">mm/hour</span>
                     </div>
-                    <div class="text-[10px] font-semibold text-slate-400 mt-1 flex items-center justify-end gap-1">
-                        <span>Raw sensor input:</span>
+                    <div class="text-[8px] sm:text-[10px] font-semibold text-slate-400 mt-1 flex items-center justify-end gap-1 whitespace-nowrap">
+                        <span>Raw:</span>
                         <span id="current-rainfall-minute" class="font-bold text-slate-700">{{ number_format($latest->rainfall ?? 0, 2) }}</span>
-                        <span>mm/minute</span>
+                        <span>mm/min</span>
                     </div>
                     <div class="flex items-center justify-end gap-1 mt-1">
-                        <div id="trend-indicator" class="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-50 text-slate-400">
-                            <i data-lucide="minus" class="w-3 h-3"></i>
+                        <div id="trend-indicator" class="flex items-center gap-1 text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-400">
+                            <i data-lucide="minus" class="w-2.5 h-2.5 sm:w-3 sm:h-3"></i>
                             <span>STABLE</span>
                         </div>
                     </div>
@@ -79,7 +79,7 @@
 
         <!-- Chart Area -->
         <div class="relative p-2 md:p-4 bg-slate-50/50">
-            <div id="rainfall-chart" class="w-full h-[400px]"></div>
+            <div id="rainfall-chart" class="w-full h-[300px] sm:h-[400px]"></div>
             
             @if($history->isEmpty())
                 <div id="chart-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm z-10">
@@ -248,7 +248,7 @@
             },
             chart: {
                 type: 'area',
-                height: 400,
+                height: window.innerWidth < 640 ? 300 : 400,
                 toolbar: { 
                     show: true,
                     autoSelected: 'pan',
