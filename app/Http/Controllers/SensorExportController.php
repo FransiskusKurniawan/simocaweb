@@ -129,14 +129,20 @@ class SensorExportController extends Controller
             $sheet->setCellValue('P' . $rowNumber, $row->jitter ?? 0);
             $sheet->setCellValue('Q' . $rowNumber, $row->delay ?? 0);
 
-            // Alignment styles
-            $sheet->getStyle('A' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('B' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('N' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('O' . $rowNumber)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $rowNumber++;
+        }
 
-            // Add thin borders to row
-            $rowStyle = [
+        // Apply bulk styles to all data rows
+        $maxRow = $rowNumber - 1;
+        if ($maxRow >= 2) {
+            // Alignment styles
+            $sheet->getStyle('A2:A' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('B2:B' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('N2:N' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('O2:O' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // Add thin borders to all data rows
+            $dataStyle = [
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -144,9 +150,7 @@ class SensorExportController extends Controller
                     ],
                 ],
             ];
-            $sheet->getStyle('A' . $rowNumber . ':Q' . $rowNumber)->applyFromArray($rowStyle);
-            
-            $rowNumber++;
+            $sheet->getStyle('A2:Q' . $maxRow)->applyFromArray($dataStyle);
         }
 
         // Auto-fit columns
