@@ -53,7 +53,13 @@ class MonitoringController extends Controller
               ->orWhereBetween('created_at', [$queryStartTime, $endTime]);
         });
 
-        $historyRaw = (clone $query)
+        $totalCount = (clone $query)->count();
+        $step = (int)ceil($totalCount / 2000);
+        if ($step > 1) {
+            $query->whereRaw("id % {$step} = 0");
+        }
+
+        $historyRaw = $query
             ->orderBy('timertc', 'desc')
             ->take(2000)
             ->get()
