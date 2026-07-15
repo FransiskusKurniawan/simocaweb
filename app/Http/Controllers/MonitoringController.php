@@ -105,7 +105,7 @@ class MonitoringController extends Controller
                 }
             }
             
-            $aggregateResult = (clone $query)->selectRaw(implode(', ', $selects))->first();
+            $aggregateResult = (clone $query)->reorder()->selectRaw(implode(', ', $selects))->first();
             
             $stats['total'] = (int)($aggregateResult->total ?? 0);
             foreach ($metrics as $key => $column) {
