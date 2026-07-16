@@ -83,6 +83,9 @@ class SensorExportController extends Controller
             'O1' => 'Pump 2 Status',
             'P1' => 'Jitter (ms)',
             'Q1' => 'Delay (ms)',
+            'R1' => 'Send Time',
+            'S1' => 'Receive Time',
+            'T1' => 'Media',
         ];
 
         foreach ($headers as $cell => $value) {
@@ -105,7 +108,7 @@ class SensorExportController extends Controller
                 'vertical' => Alignment::VERTICAL_CENTER,
             ],
         ];
-        $sheet->getStyle('A1:Q1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:T1')->applyFromArray($headerStyle);
         $sheet->getRowDimension(1)->setRowHeight(30);
 
         // Populate Data Rows
@@ -128,6 +131,9 @@ class SensorExportController extends Controller
             $sheet->setCellValue('O' . $rowNumber, $row->status_pompa2 ? 'Active' : 'Offline');
             $sheet->setCellValue('P' . $rowNumber, $row->jitter ?? 0);
             $sheet->setCellValue('Q' . $rowNumber, $row->delay ?? 0);
+            $sheet->setCellValue('R' . $rowNumber, $row->send_time);
+            $sheet->setCellValue('S' . $rowNumber, $row->receive_time);
+            $sheet->setCellValue('T' . $rowNumber, $row->media);
 
             $rowNumber++;
         }
@@ -150,11 +156,11 @@ class SensorExportController extends Controller
                     ],
                 ],
             ];
-            $sheet->getStyle('A2:Q' . $maxRow)->applyFromArray($dataStyle);
+            $sheet->getStyle('A2:T' . $maxRow)->applyFromArray($dataStyle);
         }
 
         // Auto-fit columns
-        foreach (range('A', 'Q') as $col) {
+        foreach (range('A', 'T') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

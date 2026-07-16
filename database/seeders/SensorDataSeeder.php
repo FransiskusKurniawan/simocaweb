@@ -85,6 +85,9 @@ class SensorDataSeeder extends Seeder
             'status' => 'success',
             'jitter' => rand(5, 25),
             'delay' => rand(15, 60),
+            'send_time' => $timestamp->copy()->subMilliseconds(rand(10, 100))->toIso8601String(),
+            'receive_time' => $timestamp->toIso8601String(),
+            'media' => rand(0, 1) ? 'WIFI' : 'GPRS',
             'created_at' => $timestamp,
             'updated_at' => $timestamp,
         ];

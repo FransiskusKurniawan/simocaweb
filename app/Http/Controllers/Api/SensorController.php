@@ -23,7 +23,44 @@ class SensorController extends Controller
         // Get the latest existing record to compare status
         $previousData = SensorData::latest()->first();
 
-        $data = SensorData::create($request->all());
+        // Server receive time
+        $receiveTime = \Carbon\Carbon::now();
+        $receiveTimeMs = (int) round($receiveTime->valueOf());
+
+        $payload = $request->all();
+        $payload['receive_time'] = $receiveTime->toIso8601String();
+
+        $sendTimeInput = $request->input('send_time');
+        if ($sendTimeInput) {
+            $sendTimeMs = null;
+            if (is_numeric($sendTimeInput)) {
+                if (strlen((string)$sendTimeInput) >= 13) {
+                    $sendTimeMs = (float) $sendTimeInput;
+                } else {
+                    $sendTimeMs = (float) $sendTimeInput * 1000;
+                }
+            } else {
+                try {
+                    $parsed = \Carbon\Carbon::parse($sendTimeInput);
+                    $sendTimeMs = (float) round($parsed->valueOf());
+                } catch (\Exception $e) {
+                    // Ignore parsing error
+                }
+            }
+
+            if ($sendTimeMs !== null) {
+                // Delay = Receive Time - Send Time (in milliseconds)
+                $delay = (float) ($receiveTimeMs - $sendTimeMs);
+                // Prevent MySQL float out of range error by capping or resetting if unreasonably large
+                if ($delay < 0 || $delay > 999999.99) {
+                    $payload['delay'] = 0.0;
+                } else {
+                    $payload['delay'] = $delay;
+                }
+            }
+        }
+
+        $data = SensorData::create($payload);
         
         // Eagerly calculate hourly rainfall and status to cache them before serialization/broadcasting
         $data->rainfall_hourly;

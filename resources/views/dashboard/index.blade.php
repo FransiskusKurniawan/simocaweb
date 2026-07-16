@@ -346,7 +346,7 @@
                     </div>
                     <div>
                         <p class="text-[8px] font-bold text-slate-400 uppercase leading-none">Delay</p>
-                        <p class="text-sm font-black tracking-tight"><span id="delay-value">{{ $latestData->delay ?? '0' }}</span><span class="text-[9px] text-slate-500 ml-1">ms</span></p>
+                        <p class="text-sm font-black tracking-tight"><span id="delay-value">{{ isset($latestData->delay) ? number_format($latestData->delay, 0, ',', '.') : '0' }}</span><span class="text-[9px] text-slate-500 ml-1">ms</span></p>
                     </div>
                 </div>
             </div>
@@ -533,7 +533,7 @@
                         'current-baterai-value': data.current_baterai,
                         'timertc-value': data.timertc,
                         'jitter-value': data.jitter || 0,
-                        'delay-value': data.delay || 0,
+                        'delay-value': Math.round(data.delay || 0).toLocaleString('id-ID'),
                         'last-updated-text': 'Just now'
                     };
 

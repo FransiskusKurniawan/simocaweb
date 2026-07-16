@@ -26,6 +26,9 @@ class SensorData extends Model
         'status',
         'jitter',
         'delay',
+        'send_time',
+        'receive_time',
+        'media',
     ];
 
     protected $casts = [
