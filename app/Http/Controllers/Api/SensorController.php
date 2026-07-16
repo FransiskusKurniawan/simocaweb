@@ -57,6 +57,18 @@ class SensorController extends Controller
                 } else {
                     $payload['delay'] = $delay;
                 }
+
+                // Calculate jitter: |Current Delay - Previous Delay|
+                if ($previousData && isset($previousData->delay)) {
+                    $jitter = abs($payload['delay'] - $previousData->delay);
+                    if ($jitter > 999999.99) {
+                        $payload['jitter'] = 0.0;
+                    } else {
+                        $payload['jitter'] = $jitter;
+                    }
+                } else {
+                    $payload['jitter'] = 0.0;
+                }
             }
         }
 

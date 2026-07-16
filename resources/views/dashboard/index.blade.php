@@ -337,7 +337,7 @@
                     </div>
                     <div>
                         <p class="text-[8px] font-bold text-slate-400 uppercase leading-none">Jitter</p>
-                        <p class="text-sm font-black tracking-tight"><span id="jitter-value">{{ $latestData->jitter ?? '0' }}</span><span class="text-[9px] text-slate-500 ml-1">ms</span></p>
+                        <p class="text-sm font-black tracking-tight"><span id="jitter-value">{{ isset($latestData->jitter) ? number_format($latestData->jitter, 0, ',', '.') : '0' }}</span><span class="text-[9px] text-slate-500 ml-1">ms</span></p>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -532,7 +532,7 @@
                         'voltage-baterai-value': data.voltage_baterai,
                         'current-baterai-value': data.current_baterai,
                         'timertc-value': data.timertc,
-                        'jitter-value': data.jitter || 0,
+                        'jitter-value': Math.round(data.jitter || 0).toLocaleString('id-ID'),
                         'delay-value': Math.round(data.delay || 0).toLocaleString('id-ID'),
                         'last-updated-text': 'Just now'
                     };
