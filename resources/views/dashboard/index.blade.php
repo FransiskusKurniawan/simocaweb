@@ -177,36 +177,45 @@
             
             @php
                 $wl = floatval($latestData->water_level);
-                $isHigh = ($wl <= 1.00);
-                $isMedium = ($wl > 1.10 && $wl <= 1.40);
-                $isNormal = ($wl > 1.40);
+                $isAman = ($wl > 1.32);
+                $isWaspada = ($wl > 1.12 && $wl <= 1.32);
+                $isSiaga = ($wl >= 0.90 && $wl <= 1.12);
+                $isBanjir = ($wl < 0.90);
             @endphp
 
             <!-- Status Badges Grid -->
-            <div class="grid grid-cols-3 gap-0.5 sm:gap-1 mt-3">
-                <!-- NORMAL Badge -->
-                <div id="wl-badge-normal" class="text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider
-                    {{ $isNormal 
+            <div class="grid grid-cols-2 xl:grid-cols-4 gap-1 mt-3">
+                <!-- AMAN Badge -->
+                <div id="wl-badge-aman" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal
+                    {{ $isAman 
                         ? 'bg-[#22C55E] text-white shadow-[0_0_12px_rgba(34,197,94,0.6)] scale-[1.03] border border-[#22C55E]' 
                         : 'bg-transparent text-[#22C55E] border border-green-500/20 opacity-50' 
                     }}">
-                    NORMAL
+                    AMAN
                 </div>
-                <!-- MEDIUM Badge -->
-                <div id="wl-badge-medium" class="text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider
-                    {{ $isMedium 
+                <!-- WASPADA Badge -->
+                <div id="wl-badge-waspada" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal
+                    {{ $isWaspada 
                         ? 'bg-[#F59E0B] text-white shadow-[0_0_12px_rgba(245,158,11,0.6)] scale-[1.03] border border-[#F59E0B]' 
                         : 'bg-transparent text-[#F59E0B] border border-amber-500/20 opacity-50' 
                     }}">
-                    MEDIUM
+                    WASPADA
                 </div>
-                <!-- HIGH Badge -->
-                <div id="wl-badge-high" class="text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider
-                    {{ $isHigh 
+                <!-- SIAGA Badge -->
+                <div id="wl-badge-siaga" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal
+                    {{ $isSiaga 
+                        ? 'bg-[#F97316] text-white shadow-[0_0_12px_rgba(249,115,22,0.6)] scale-[1.03] border border-[#F97316]' 
+                        : 'bg-transparent text-[#F97316] border border-orange-500/20 opacity-50' 
+                    }}">
+                    SIAGA
+                </div>
+                <!-- BANJIR Badge -->
+                <div id="wl-badge-banjir" class="text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal
+                    {{ $isBanjir 
                         ? 'bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.6)] scale-[1.03] border border-[#EF4444]' 
                         : 'bg-transparent text-[#EF4444] border border-red-500/20 opacity-50' 
                     }}">
-                    HIGH
+                    BANJIR
                 </div>
             </div>
         </a>
@@ -540,34 +549,43 @@
 
                     // Update Water Level Status Badges
                     const wl = parseFloat(data.water_level);
-                    const badgeNormal = document.getElementById('wl-badge-normal');
-                    const badgeMedium = document.getElementById('wl-badge-medium');
-                    const badgeHigh = document.getElementById('wl-badge-high');
+                    const badgeAman = document.getElementById('wl-badge-aman');
+                    const badgeWaspada = document.getElementById('wl-badge-waspada');
+                    const badgeSiaga = document.getElementById('wl-badge-siaga');
+                    const badgeBanjir = document.getElementById('wl-badge-banjir');
 
-                    if (badgeNormal && badgeMedium && badgeHigh) {
-                        const isHigh = (wl <= 1.00);
-                        const isMedium = (wl > 1.10 && wl <= 1.40);
-                        const isNormal = (wl > 1.40);
+                    if (badgeAman && badgeWaspada && badgeSiaga && badgeBanjir) {
+                        const isAman = (wl > 1.32);
+                        const isWaspada = (wl > 1.12 && wl <= 1.32);
+                        const isSiaga = (wl >= 0.90 && wl <= 1.12);
+                        const isBanjir = (wl < 0.90);
 
-                        // Normal
-                        if (isNormal) {
-                            badgeNormal.className = "text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider bg-[#22C55E] text-white shadow-[0_0_12px_rgba(34,197,94,0.6)] scale-[1.03] border border-[#22C55E]";
+                        // Aman
+                        if (isAman) {
+                            badgeAman.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-[#22C55E] text-white shadow-[0_0_12px_rgba(34,197,94,0.6)] scale-[1.03] border border-[#22C55E]";
                         } else {
-                            badgeNormal.className = "text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider bg-transparent text-[#22C55E] border border-green-500/20 opacity-50";
+                            badgeAman.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-transparent text-[#22C55E] border border-green-500/20 opacity-50";
                         }
 
-                        // Medium
-                        if (isMedium) {
-                            badgeMedium.className = "text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider bg-[#F59E0B] text-white shadow-[0_0_12px_rgba(245,158,11,0.6)] scale-[1.03] border border-[#F59E0B]";
+                        // Waspada
+                        if (isWaspada) {
+                            badgeWaspada.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-[#F59E0B] text-white shadow-[0_0_12px_rgba(245,158,11,0.6)] scale-[1.03] border border-[#F59E0B]";
                         } else {
-                            badgeMedium.className = "text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider bg-transparent text-[#F59E0B] border border-amber-500/20 opacity-50";
+                            badgeWaspada.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-transparent text-[#F59E0B] border border-amber-500/20 opacity-50";
                         }
 
-                        // High
-                        if (isHigh) {
-                            badgeHigh.className = "text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.6)] scale-[1.03] border border-[#EF4444]";
+                        // Siaga
+                        if (isSiaga) {
+                            badgeSiaga.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-[#F97316] text-white shadow-[0_0_12px_rgba(249,115,22,0.6)] scale-[1.03] border border-[#F97316]";
                         } else {
-                            badgeHigh.className = "text-center transition-all duration-300 rounded-lg py-1 px-0 text-[7px] min-[370px]:text-[8px] sm:text-[9px] font-extrabold uppercase tracking-tighter min-[370px]:tracking-wider bg-transparent text-[#EF4444] border border-red-500/20 opacity-50";
+                            badgeSiaga.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-transparent text-[#F97316] border border-orange-500/20 opacity-50";
+                        }
+
+                        // Banjir
+                        if (isBanjir) {
+                            badgeBanjir.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-[#EF4444] text-white shadow-[0_0_12px_rgba(239,68,68,0.6)] scale-[1.03] border border-[#EF4444]";
+                        } else {
+                            badgeBanjir.className = "text-center transition-all duration-300 rounded-lg py-1 px-0.5 text-[8px] min-[370px]:text-[9px] font-extrabold uppercase tracking-tighter xl:tracking-normal bg-transparent text-[#EF4444] border border-red-500/20 opacity-50";
                         }
                     }
 
