@@ -73,11 +73,12 @@ class SensorData extends Model
     {
         $sorted = [];
         foreach ($records as $record) {
+            $record->temp_ts = self::getRecordTimestamp($record);
             $sorted[] = $record;
         }
 
         usort($sorted, function ($a, $b) {
-            return self::getRecordTimestamp($a) <=> self::getRecordTimestamp($b);
+            return $a->temp_ts <=> $b->temp_ts;
         });
 
         $left = 0;
@@ -85,12 +86,12 @@ class SensorData extends Model
         $count = count($sorted);
 
         for ($right = 0; $right < $count; $right++) {
-            $rightTime = self::getRecordTimestamp($sorted[$right]);
+            $rightTime = $sorted[$right]->temp_ts;
             
             $currentSum += $sorted[$right]->rainfall;
 
             while ($left < $right) {
-                $leftTime = self::getRecordTimestamp($sorted[$left]);
+                $leftTime = $sorted[$left]->temp_ts;
                 if ($rightTime - $leftTime > 3600) {
                     $currentSum -= $sorted[$left]->rainfall;
                     $left++;

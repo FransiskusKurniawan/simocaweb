@@ -63,6 +63,7 @@ class SensorExportController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Sensor Data');
+        $sheet->setShowGridlines(true);
 
         // Set Header Columns
         $headers = [
@@ -111,57 +112,68 @@ class SensorExportController extends Controller
         $sheet->getStyle('A1:T1')->applyFromArray($headerStyle);
         $sheet->getRowDimension(1)->setRowHeight(30);
 
-        // Populate Data Rows
-        $rowNumber = 2;
+        // Populate Data Rows in bulk using fromArray
+        $dataArray = [];
         foreach ($data as $index => $row) {
-            $sheet->setCellValue('A' . $rowNumber, $index + 1);
-            $sheet->setCellValue('B' . $rowNumber, $row->timertc);
-            $sheet->setCellValue('C' . $rowNumber, $row->rainfall);
-            $sheet->setCellValue('D' . $rowNumber, $row->rainfall_hourly);
-            $sheet->setCellValue('E' . $rowNumber, $row->status); // dynamic status attribute
-            $sheet->setCellValue('F' . $rowNumber, $row->temperature);
-            $sheet->setCellValue('G' . $rowNumber, $row->humidity);
-            $sheet->setCellValue('H' . $rowNumber, $row->water_level);
-            $sheet->setCellValue('I' . $rowNumber, $row->lux);
-            $sheet->setCellValue('J' . $rowNumber, $row->voltage_panel);
-            $sheet->setCellValue('K' . $rowNumber, $row->current_panel);
-            $sheet->setCellValue('L' . $rowNumber, $row->voltage_baterai);
-            $sheet->setCellValue('M' . $rowNumber, $row->current_baterai);
-            $sheet->setCellValue('N' . $rowNumber, $row->status_pompa ? 'Active' : 'Offline');
-            $sheet->setCellValue('O' . $rowNumber, $row->status_pompa2 ? 'Active' : 'Offline');
-            $sheet->setCellValue('P' . $rowNumber, $row->jitter ?? 0);
-            $sheet->setCellValue('Q' . $rowNumber, $row->delay ?? 0);
-            $sheet->setCellValue('R' . $rowNumber, $row->send_time);
-            $sheet->setCellValue('S' . $rowNumber, $row->receive_time);
-            $sheet->setCellValue('T' . $rowNumber, $row->media);
-
-            $rowNumber++;
-        }
-
-        // Apply bulk styles to all data rows
-        $maxRow = $rowNumber - 1;
-        if ($maxRow >= 2) {
-            // Alignment styles
-            $sheet->getStyle('A2:A' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('B2:B' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('N2:N' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('O2:O' . $maxRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-            // Add thin borders to all data rows
-            $dataStyle = [
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => 'E2E8F0'], // Slate 200
-                    ],
-                ],
+            $dataArray[] = [
+                $index + 1,
+                $row->timertc,
+                $row->rainfall,
+                $row->rainfall_hourly,
+                $row->status, // dynamic status attribute
+                $row->temperature,
+                $row->humidity,
+                $row->water_level,
+                $row->lux,
+                $row->voltage_panel,
+                $row->current_panel,
+                $row->voltage_baterai,
+                $row->current_baterai,
+                $row->status_pompa ? 'Active' : 'Offline',
+                $row->status_pompa2 ? 'Active' : 'Offline',
+                $row->jitter ?? 0,
+                $row->delay ?? 0,
+                $row->send_time,
+                $row->receive_time,
+                $row->media,
             ];
-            $sheet->getStyle('A2:T' . $maxRow)->applyFromArray($dataStyle);
         }
+        $sheet->fromArray($dataArray, null, 'A2');
 
-        // Auto-fit columns
-        foreach (range('A', 'T') as $col) {
-            $sheet->getColumnDimension($col)->setAutoSize(true);
+        // Column-level styling (alignment)
+        $sheet->getStyle('A')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('N')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('O')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Re-align headers to center (since column alignment overrides header row)
+        $sheet->getStyle('A1:T1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Set predefined column widths instead of slow auto-fit
+        $colWidths = [
+            'A' => 6,
+            'B' => 22,
+            'C' => 22,
+            'D' => 22,
+            'E' => 18,
+            'F' => 18,
+            'G' => 15,
+            'H' => 18,
+            'I' => 15,
+            'J' => 24,
+            'K' => 24,
+            'L' => 24,
+            'M' => 24,
+            'N' => 16,
+            'O' => 16,
+            'P' => 15,
+            'Q' => 15,
+            'R' => 22,
+            'S' => 22,
+            'T' => 12,
+        ];
+        foreach ($colWidths as $col => $width) {
+            $sheet->getColumnDimension($col)->setWidth($width);
         }
 
         // Create file name
