@@ -138,7 +138,7 @@ class SensorExportController extends Controller
                 $row->media,
             ];
         }
-        $sheet->fromArray($dataArray, null, 'A2');
+        $sheet->fromArray($dataArray, null, 'A2', true);
 
         // Column-level styling (alignment)
         $sheet->getStyle('A')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
