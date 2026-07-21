@@ -74,4 +74,5 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/notification', [App\Http\Controllers\NotificationController::class, 'index'])->name('notification.index');
     Route::post('/notification/read-all', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notification.read-all');
+    Route::post('/notification/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notification.read');
 });
