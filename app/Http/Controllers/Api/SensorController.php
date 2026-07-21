@@ -110,6 +110,36 @@ class SensorController extends Controller
                     \Log::error('FCM dispatch failed: ' . $e->getMessage());
                 }
             }
+
+            // Detect rainfall crossing threshold: previous <= 10 and current > 10 mm/hour
+            $prevRainfallHourly = $previousData->rainfall_hourly ?? 0;
+            $currRainfallHourly = $data->rainfall_hourly ?? 0;
+            $rainfallThresholdCrossed = ($prevRainfallHourly <= 10 && $currRainfallHourly > 10);
+
+            if ($rainfallThresholdCrossed) {
+                $rainfallFormatted = number_format($currRainfallHourly, 2);
+
+                try {
+                    // Save rainfall notification to the database
+                    \App\Models\Notification::create([
+                        'title' => '🌧️ Curah Hujan Tinggi',
+                        'body' => "Curah hujan mencapai {$rainfallFormatted} mm/hour",
+                        'type' => 'rainfall',
+                        'is_read' => false
+                    ]);
+
+                    \App\Services\FcmNotificationService::sendToAll(
+                        '🌧️ Curah Hujan Tinggi',
+                        "Curah hujan mencapai {$rainfallFormatted} mm/hour",
+                        [
+                            'rainfall_event' => 'threshold_exceeded',
+                            'rainfall_hourly' => (string) $currRainfallHourly,
+                        ]
+                    );
+                } catch (\Exception $e) {
+                    \Log::error('FCM rainfall dispatch failed: ' . $e->getMessage());
+                }
+            }
         }
         
         // Dispatch event for real-time update (wrapped in try-catch to prevent crash if websocket is offline)

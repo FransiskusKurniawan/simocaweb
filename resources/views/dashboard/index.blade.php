@@ -386,6 +386,9 @@
         let lastPump1Status = {{ $latestData && $latestData->status_pompa ? 'true' : 'false' }};
         let lastPump2Status = {{ $latestData && $latestData->status_pompa2 ? 'true' : 'false' }};
 
+        // Rainfall threshold state — track last known hourly value to detect crossing
+        let lastRainfallHourly = {{ $latestData ? $latestData->rainfall_hourly : 0 }};
+
         // Trigger browser notification
         function triggerBrowserNotification(title, body) {
             if (!("Notification" in window)) return;
@@ -396,17 +399,31 @@
         }
 
         // Show elegant custom toast notification
-        function showToastNotification(title, message) {
+        function showToastNotification(title, message, type = 'default') {
             const container = document.getElementById('toast-container');
             if (!container) return;
 
             const toast = document.createElement('div');
             toast.className = 'pointer-events-auto bg-white/95 border border-slate-100 shadow-2xl rounded-2xl p-4 flex gap-3.5 items-start animate__animated animate__fadeInUp duration-300';
             toast.style.backdropFilter = 'blur(10px)';
+
+            // Choose icon and color based on notification type
+            let iconBg = 'bg-indigo-50';
+            let iconColor = 'text-indigo-600';
+            let iconName = 'bell';
+            if (type === 'rainfall') {
+                iconBg = 'bg-blue-50';
+                iconColor = 'text-blue-600';
+                iconName = 'cloud-rain';
+            } else if (type === 'pump') {
+                iconBg = 'bg-red-50';
+                iconColor = 'text-red-600';
+                iconName = 'cog';
+            }
             
             toast.innerHTML = `
-                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
+                <div class="w-10 h-10 ${iconBg} ${iconColor} rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner">
+                    <i data-lucide="${iconName}" class="w-5 h-5"></i>
                 </div>
                 <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-black text-slate-800 tracking-tight leading-none mb-1">${title}</h4>
@@ -640,11 +657,21 @@
                     const pumpText = document.getElementById('pump-status-text');
                     const isActive = data.status_pompa === true || data.status_pompa === 1 || data.status_pompa === '1' || data.status_pompa === 'true';
                     
+                    // ── Rainfall threshold notification ──
+                    const currRainfallHourly = parseFloat(data.rainfall_hourly) || 0;
+                    if (lastRainfallHourly <= 10 && currRainfallHourly > 10) {
+                        const rainfallTitle = '🌧️ Curah Hujan Tinggi';
+                        const rainfallBody = `Curah hujan mencapai ${currRainfallHourly.toFixed(2)} mm/hour (melebihi batas 10 mm/hour)`;
+                        triggerBrowserNotification(rainfallTitle, rainfallBody);
+                        showToastNotification(rainfallTitle, rainfallBody, 'rainfall');
+                    }
+                    lastRainfallHourly = currRainfallHourly;
+
                     if (isActive && !lastPump1Status) {
                         const title = '🚨 Pump Activated';
                         const body = 'The water pump (Pump 1) has been switched ON';
                         triggerBrowserNotification(title, body);
-                        showToastNotification(title, body);
+                        showToastNotification(title, body, 'pump');
                     }
                     lastPump1Status = isActive;
                     
@@ -678,7 +705,7 @@
                         const title = '🚨 Pump Activated';
                         const body = 'The water pump (Pump 2) has been switched ON';
                         triggerBrowserNotification(title, body);
-                        showToastNotification(title, body);
+                        showToastNotification(title, body, 'pump');
                     }
                     lastPump2Status = isActive2;
                     
