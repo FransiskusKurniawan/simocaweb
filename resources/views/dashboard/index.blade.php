@@ -573,7 +573,7 @@
 
                     if (badgeAman && badgeWaspada && badgeSiaga && badgeBanjir) {
                         const isAman = (wl > 0.82);
-                        const isWaspada = (wl > 0.62 && wl <= 0,82);
+                        const isWaspada = (wl > 0.62 && wl <= 0.82);
                         const isSiaga = (wl >= 0.40 && wl <= 0.62);
                         const isBanjir = (wl < 0.40);
 
