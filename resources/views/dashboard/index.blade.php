@@ -177,10 +177,10 @@
             
             @php
                 $wl = floatval($latestData->water_level);
-                $isAman = ($wl > 1.32);
-                $isWaspada = ($wl > 1.12 && $wl <= 1.32);
-                $isSiaga = ($wl >= 0.90 && $wl <= 1.12);
-                $isBanjir = ($wl < 0.90);
+                $isAman = ($wl > 0.82);
+                $isWaspada = ($wl > 0.62 && $wl <= 0.82);
+                $isSiaga = ($wl >= 0.40 && $wl <= 0.62);
+                $isBanjir = ($wl < 0.40);
             @endphp
 
             <!-- Status Badges Grid -->
@@ -572,10 +572,10 @@
                     const badgeBanjir = document.getElementById('wl-badge-banjir');
 
                     if (badgeAman && badgeWaspada && badgeSiaga && badgeBanjir) {
-                        const isAman = (wl > 1.32);
-                        const isWaspada = (wl > 1.12 && wl <= 1.32);
-                        const isSiaga = (wl >= 0.90 && wl <= 1.12);
-                        const isBanjir = (wl < 0.90);
+                        const isAman = (wl > 0.82);
+                        const isWaspada = (wl > 0.62 && wl <= 0,82);
+                        const isSiaga = (wl >= 0.40 && wl <= 0.62);
+                        const isBanjir = (wl < 0.40);
 
                         // Aman
                         if (isAman) {
