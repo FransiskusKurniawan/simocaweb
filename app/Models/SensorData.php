@@ -139,7 +139,7 @@ class SensorData extends Model
      */
     public function getStatusAttribute()
     {
-        $r = $this->rainfall_hourly;
+        $r = $this->rainfall ?? $this->rainfall_hourly ?? 0;
         if ($r <= 0) {
             return 'No Rain';
         } elseif ($r <= 1) {

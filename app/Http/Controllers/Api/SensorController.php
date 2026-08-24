@@ -113,10 +113,10 @@ class SensorController extends Controller
 
             // Detect rainfall crossing threshold >= 10 mm/hour
             // We use cache to remember the last known state to detect crossing transition.
-            $currRainfallHourly = $data->rainfall_hourly ?? 0;
+            $currRainfall = $data->rainfall ?? 0;
             $cacheKey = 'rainfall_above_threshold';
             $wasAboveThreshold = \Illuminate\Support\Facades\Cache::get($cacheKey, false);
-            $isAboveThreshold = $currRainfallHourly > 10;
+            $isAboveThreshold = $currRainfall > 10;
 
             // Update cache with current state
             \Illuminate\Support\Facades\Cache::put($cacheKey, $isAboveThreshold, now()->addHours(2));
@@ -125,7 +125,7 @@ class SensorController extends Controller
             $rainfallThresholdCrossed = (!$wasAboveThreshold && $isAboveThreshold);
 
             if ($rainfallThresholdCrossed) {
-                $rainfallFormatted = number_format($currRainfallHourly, 2);
+                $rainfallFormatted = number_format($currRainfall, 2);
 
                 try {
                     // Save rainfall notification to the database
@@ -141,7 +141,8 @@ class SensorController extends Controller
                         "Curah hujan mencapai {$rainfallFormatted} mm/hour",
                         [
                             'rainfall_event' => 'threshold_exceeded',
-                            'rainfall_hourly' => (string) $currRainfallHourly,
+                            'rainfall' => (string) $currRainfall,
+                            'rainfall_hourly' => (string) $currRainfall,
                         ]
                     );
                 } catch (\Exception $e) {

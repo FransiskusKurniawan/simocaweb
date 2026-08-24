@@ -81,14 +81,8 @@
                     <p class="text-primary-100 text-[10px] font-bold uppercase tracking-widest mb-2 leading-none">Rainfall</p>
                     <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                         <div class="flex items-baseline gap-2">
-                            <span class="text-5xl font-black tracking-tight" id="rainfall-value">{{ number_format($latestData->rainfall_hourly, 2) }}</span>
+                            <span class="text-5xl font-black tracking-tight" id="rainfall-value">{{ number_format($latestData->rainfall, 2) }}</span>
                             <span class="text-primary-200 font-bold text-sm uppercase tracking-wider">mm/hour</span>
-                        </div>
-                        
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 text-white shadow-inner w-fit sm:ml-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-blue-300 animate-pulse"></span>
-                            <span id="rainfall-minute-value" class="text-xs font-bold tabular-nums">{{ number_format($latestData->rainfall, 2) }}</span>
-                            <span class="text-[9px] font-bold text-primary-200 uppercase tracking-wider">mm/minute</span>
                         </div>
                     </div>
                 </div>
@@ -97,7 +91,7 @@
             <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl px-6 py-4 flex flex-col items-center flex-shrink-0">
                 <p class="text-[10px] font-bold text-primary-100 uppercase tracking-widest mb-1">Status</p>
                 @php
-                    $r = $latestData->rainfall_hourly;
+                    $r = $latestData->rainfall;
                     if ($r < 1) {
                         $dotColor = 'bg-green-400';
                         $shadowColor = 'rgba(74,222,128,0.5)';
@@ -386,8 +380,8 @@
         let lastPump1Status = {{ $latestData && $latestData->status_pompa ? 'true' : 'false' }};
         let lastPump2Status = {{ $latestData && $latestData->status_pompa2 ? 'true' : 'false' }};
 
-        // Rainfall threshold state — track last known hourly value to detect crossing
-        let lastRainfallHourly = {{ $latestData ? $latestData->rainfall_hourly : 0 }};
+        // Rainfall threshold state — track last known value to detect crossing
+        let lastRainfall = {{ $latestData ? $latestData->rainfall : 0 }};
 
         // Trigger browser notification
         function triggerBrowserNotification(title, body) {
@@ -504,7 +498,7 @@
                     
                     const data = e.data;
                                       // Calculate dynamic status text & dot style
-                    const r = parseFloat(data.rainfall_hourly);
+                    const r = parseFloat(data.rainfall);
                     let statusText = 'No Rain';
                     let dotClass = 'bg-green-400';
                     let shadowColor = 'rgba(74,222,128,0.5)';
@@ -537,8 +531,7 @@
                     
                     // Update simple text values
                     const fields = {
-                        'rainfall-value': parseFloat(data.rainfall_hourly).toFixed(2),
-                        'rainfall-minute-value': parseFloat(data.rainfall).toFixed(2),
+                        'rainfall-value': parseFloat(data.rainfall).toFixed(2),
                         'status-value': statusText,
                         'temperature-value': data.temperature,
                         'humidity-value': data.humidity,
@@ -658,14 +651,14 @@
                     const isActive = data.status_pompa === true || data.status_pompa === 1 || data.status_pompa === '1' || data.status_pompa === 'true';
                     
                     // ── Rainfall threshold notification ──
-                    const currRainfallHourly = parseFloat(data.rainfall_hourly) || 0;
-                    if (lastRainfallHourly <= 10 && currRainfallHourly > 10) {
+                    const currRainfall = parseFloat(data.rainfall) || 0;
+                    if (lastRainfall <= 10 && currRainfall > 10) {
                         const rainfallTitle = '🌧️ Curah Hujan Tinggi';
-                        const rainfallBody = `Curah hujan mencapai ${currRainfallHourly.toFixed(2)} mm/hour (melebihi batas 10 mm/hour)`;
+                        const rainfallBody = `Curah hujan mencapai ${currRainfall.toFixed(2)} mm/hour (melebihi batas 10 mm/hour)`;
                         triggerBrowserNotification(rainfallTitle, rainfallBody);
                         showToastNotification(rainfallTitle, rainfallBody, 'rainfall');
                     }
-                    lastRainfallHourly = currRainfallHourly;
+                    lastRainfall = currRainfall;
 
                     if (isActive && !lastPump1Status) {
                         const title = '🚨 Pump Activated';
