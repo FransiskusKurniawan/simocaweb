@@ -40,17 +40,9 @@ class MonitoringController extends Controller
             $startTime = $endTime->copy()->subMinutes($durationInMinutes);
         }
 
-        $isRainfall = in_array('rainfall', $metrics);
-        
-        if ($isRainfall) {
-            $queryStartTime = $startTime->copy()->subHour();
-        } else {
-            $queryStartTime = $startTime;
-        }
-
-        $query = SensorData::where(function($q) use ($queryStartTime, $endTime) {
-            $q->whereBetween('timertc', [$queryStartTime->format('Y-m-d H:i:s'), $endTime->format('Y-m-d H:i:s')])
-              ->orWhereBetween('created_at', [$queryStartTime, $endTime]);
+        $query = SensorData::where(function($q) use ($startTime, $endTime) {
+            $q->whereBetween('timertc', [$startTime->format('Y-m-d H:i:s'), $endTime->format('Y-m-d H:i:s')])
+              ->orWhereBetween('created_at', [$startTime, $endTime]);
         });
 
         $totalCount = (clone $query)->count();
@@ -59,38 +51,22 @@ class MonitoringController extends Controller
             $query->whereRaw("id % {$step} = 0");
         }
 
-        $historyRaw = $query
+        $history = $query
             ->orderBy('timertc', 'desc')
             ->take(2000)
             ->get()
             ->reverse()
             ->values();
 
-        if ($isRainfall) {
-            SensorData::calculateHourlyRainfall($historyRaw);
-            
-            // Filter back to the original startTime range
-            $history = $historyRaw->filter(function($record) use ($startTime) {
-                $time = $record->created_at;
-                if (!empty($record->timertc)) {
-                    try {
-                        $time = Carbon::parse($record->timertc);
-                    } catch (\Exception $e) {}
-                }
-                return $time->greaterThanOrEqualTo($startTime);
-            })->values();
-        } else {
-            $history = $historyRaw;
-        }
-
         $latestRecord = SensorData::orderBy('timertc', 'desc')->first();
         $maxTime = $latestRecord ? $latestRecord->timertc : $now->toIso8601String();
 
+        $isRainfall = in_array('rainfall', $metrics);
         $stats = [];
         if ($isRainfall) {
-            $rainfallHourlyValues = $history->map(fn($r) => $r->rainfall_hourly);
-            $stats['val_max'] = (float)$rainfallHourlyValues->max() ?? 0.0;
-            $stats['val_avg'] = (float)$rainfallHourlyValues->avg() ?? 0.0;
+            $rainfallValues = $history->map(fn($r) => $r->rainfall);
+            $stats['val_max'] = (float)$rainfallValues->max() ?? 0.0;
+            $stats['val_avg'] = (float)$rainfallValues->avg() ?? 0.0;
             $stats['total'] = (int)$history->count();
         } else {
             $selects = ['COUNT(*) as total'];
@@ -141,29 +117,16 @@ class MonitoringController extends Controller
         $startTime = $now->copy()->subDay();
         $latest = SensorData::latest()->first();
         
-        $queryStartTime = $startTime->copy()->subHour();
-        $historyRaw = SensorData::where('timertc', '>=', $queryStartTime->format('Y-m-d H:i:s'))
-            ->orWhere('created_at', '>=', $queryStartTime)
+        $history = SensorData::where('timertc', '>=', $startTime->format('Y-m-d H:i:s'))
+            ->orWhere('created_at', '>=', $startTime)
             ->orderBy('timertc', 'desc')->take(1100)->get()->reverse()->values();
-            
-        SensorData::calculateHourlyRainfall($historyRaw);
-        
-        $history = $historyRaw->filter(function($record) use ($startTime) {
-            $time = $record->created_at;
-            if (!empty($record->timertc)) {
-                try {
-                    $time = Carbon::parse($record->timertc);
-                } catch (\Exception $e) {}
-            }
-            return $time->greaterThanOrEqualTo($startTime);
-        })->values();
 
-        $rainfallHourlyValues = $history->map(fn($r) => $r->rainfall_hourly);
+        $rainfallValues = $history->map(fn($r) => $r->rainfall);
 
         $aggregates = SensorData::selectRaw('COUNT(*) as total')->first();
         $globalStats = [
-            'max' => (float)$rainfallHourlyValues->max() ?? 0.0,
-            'avg' => (float)$rainfallHourlyValues->avg() ?? 0.0,
+            'max' => (float)$rainfallValues->max() ?? 0.0,
+            'avg' => (float)$rainfallValues->avg() ?? 0.0,
             'total' => (int)($aggregates->total ?? 0)
         ];
         return view('monitoring.rainfall', compact('history', 'latest', 'globalStats'));

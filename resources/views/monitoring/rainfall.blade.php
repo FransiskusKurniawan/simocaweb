@@ -45,13 +45,8 @@
 
                 <div class="text-right shrink-0">
                     <div class="flex items-baseline justify-end gap-1 whitespace-nowrap">
-                        <span class="text-2xl sm:text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall_hourly ?? 0, 2) }}</span>
+                        <span class="text-2xl sm:text-4xl font-black text-slate-900 tabular-nums tracking-tighter" id="current-rainfall-large">{{ number_format($latest->rainfall ?? 0, 2) }}</span>
                         <span class="text-xs sm:text-sm font-bold text-slate-400">mm/hour</span>
-                    </div>
-                    <div class="text-[8px] sm:text-[10px] font-semibold text-slate-400 mt-1 flex items-center justify-end gap-1 whitespace-nowrap">
-                        <span>Raw:</span>
-                        <span id="current-rainfall-minute" class="font-bold text-slate-700">{{ number_format($latest->rainfall ?? 0, 2) }}</span>
-                        <span>mm/min</span>
                     </div>
                     <div class="flex items-center justify-end gap-1 mt-1">
                         <div id="trend-indicator" class="flex items-center gap-1 text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-50 text-slate-400">
@@ -214,7 +209,7 @@
         // Chart Configuration
         const options = {
             series: [{
-                name: 'Rainfall (mm/minute)',
+                name: 'Rainfall (mm/hour)',
                 data: chartData
             }],
             colors: ['#0284c7'],
@@ -378,7 +373,7 @@
                             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 border-b border-slate-800 pb-1">${timeStr}</div>
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full bg-primary-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-                                <div class="text-lg font-black tracking-tight">${value.toFixed(2)} <span class="text-xs font-bold text-slate-400">mm/minute</span></div>
+                                <div class="text-lg font-black tracking-tight">${value.toFixed(2)} <span class="text-xs font-bold text-slate-400">mm/hour</span></div>
                             </div>
                         </div>
                     `;
@@ -691,8 +686,7 @@
                     const data = e.data;
                     console.log('Real-time data received:', data);
                     
-                    const rainfallValue = data.rainfall_hourly !== undefined && data.rainfall_hourly !== null ? parseFloat(data.rainfall_hourly) : null;
-                    const rawRainfallValue = data.rainfall !== undefined && data.rainfall !== null ? parseFloat(data.rainfall) : null;
+                    const rainfallValue = data.rainfall !== undefined && data.rainfall !== null ? parseFloat(data.rainfall) : null;
                     const timeSource = data.timertc || data.created_at;
                     const timestamp = timeSource ? new Date(timeSource).getTime() : Date.now();
 
@@ -702,7 +696,7 @@
 
                     // Update local data array with duplicate check
                     if (!chartData.some(d => d.x === timestamp)) {
-                        chartData.push({ x: timestamp, y: Number.isFinite(rawRainfallValue) ? rawRainfallValue : null });
+                        chartData.push({ x: timestamp, y: Number.isFinite(rainfallValue) ? rainfallValue : null });
                         // Sort chronologically from left to right
                         chartData.sort((a, b) => a.x - b.x);
                         
@@ -725,9 +719,6 @@
                         // Update global stats for real-time
                         currentGlobalStats.total++;
                         currentGlobalStats.max = Math.max(currentGlobalStats.max, newValue);
-                        // Average is trickier to update perfectly without full sum, but we can approximate or just leave it for now
-                        // For a precise average, we'd need total sum:
-                        // currentGlobalStats.avg = (currentGlobalStats.avg * (currentGlobalStats.total - 1) + newValue) / currentGlobalStats.total;
                         
                         // Update trend indicator
                         if (trendEl) {
@@ -743,11 +734,6 @@
                     }
 
                     updateSummary(currentGlobalStats);
-
-                    const currentMinuteEl = document.getElementById('current-rainfall-minute');
-                    if (currentMinuteEl && rawRainfallValue !== null) {
-                        currentMinuteEl.innerText = rawRainfallValue.toFixed(2);
-                    }
                 });
         }
     });
